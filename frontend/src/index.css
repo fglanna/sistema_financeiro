@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-canvas text-brand-text font-body;
+  }
+}
+
+/* Utilitário para numerais tabulares conforme DESIGN.md e FSD */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
