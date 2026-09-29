@@ -67,17 +67,17 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `backend/src/database/migrations/*`
   * `backend/src/database/seeds/*`
 * **Checklist:**
-  - [ ] Criar migration para função trigger `update_updated_at_column()`.
-  - [ ] Criar migration para tabela `users` (com trigger `updated_at`).
-  - [ ] Criar migration para tabela `categories` (com constraint `chk_category_owner` e trigger `updated_at`).
-  - [ ] Criar migration para tabela `payment_methods` (domínio fixo com id `SMALLINT`).
-  - [ ] Criar migration para tabela `financial_transactions` (com constraints de status/pagamento e trigger `updated_at`).
-  - [ ] Criar migration para tabela `password_reset_tokens` (registro imutável).
-  - [ ] Criar migration para tabela `security_logs` (registro de auditoria imutável).
-  - [ ] Criar migration para índices de otimização (`idx_transactions_user_due`, `idx_transactions_user_status`, `idx_transactions_user_category`, `idx_categories_user_type`).
-  - [ ] Criar seed para inserção do domínio fixo de `payment_methods` (Pix, Cartão de Crédito, Cartão de Débito, Dinheiro, Boleto, Transferência).
-  - [ ] Criar seed para inserção das categorias padrão do sistema (`is_default = TRUE`, `user_id = NULL`).
-  - [ ] Executar migrations e seeds e validar estrutura no PostgreSQL.
+  - [x] Criar migration para função trigger `update_updated_at_column()`.
+  - [x] Criar migration para tabela `users` (com trigger `updated_at`).
+  - [x] Criar migration para tabela `categories` (com constraint `chk_category_owner` e trigger `updated_at`).
+  - [x] Criar migration para tabela `payment_methods` (domínio fixo com id `SMALLINT`).
+  - [x] Criar migration para tabela `financial_transactions` (com constraints de status/pagamento e trigger `updated_at`).
+  - [x] Criar migration para tabela `password_reset_tokens` (registro imutável).
+  - [x] Criar migration para tabela `security_logs` (registro de auditoria imutável).
+  - [x] Criar migration para índices de otimização (`idx_transactions_user_due`, `idx_transactions_user_status`, `idx_transactions_user_category`, `idx_categories_user_type`).
+  - [x] Criar seed para inserção do domínio fixo de `payment_methods` (Pix, Cartão de Crédito, Cartão de Débito, Dinheiro, Boleto, Transferência).
+  - [x] Criar seed para inserção das categorias padrão do sistema (`is_default = TRUE`, `user_id = NULL`).
+  - [x] Executar migrations e seeds e validar estrutura no PostgreSQL.
 * **Critério de conclusão:** Todas as migrations e seeds executadas com sucesso sem erros; tabelas, triggers, restrições e índices criados rigorosamente de acordo com a Seção 8 do FSD.
 
 ---
