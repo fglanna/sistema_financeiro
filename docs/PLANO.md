@@ -101,16 +101,16 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `backend/src/routes/authRoutes.js`
   * `backend/src/routes/userRoutes.js`
 * **Checklist:**
-  - [ ] Implementar `config.js` centralizando `process.env`.
-  - [ ] Implementar middleware global de erros com gravação em `backend/logs/error.log`.
-  - [ ] Implementar rate limiting (5 req / 15 min) com `express-rate-limit` para `/api/auth/login` e `/api/auth/forgot-password`.
-  - [ ] Implementar autenticação JWT (token 24h, verificação Bearer).
-  - [ ] Implementar `POST /api/auth/register` (hash bcrypt custo 10, saldo inicial padrão R$ 0,00).
-  - [ ] Implementar `POST /api/auth/login`.
-  - [ ] Implementar `POST /api/auth/forgot-password` (geração de token SHA-256 e mock/integração com envio de e-mail).
-  - [ ] Implementar `POST /api/auth/reset-password` (invalidação com `used = TRUE`).
-  - [ ] Implementar `GET /api/users/me` e `PUT /api/users/me`.
-  - [ ] Implementar `DELETE /api/users/me` com exclusão em cascata (RN10) e log de auditoria em `security_logs`.
+  - [x] Implementar `config.js` centralizando `process.env`.
+  - [x] Implementar middleware global de erros com gravação em `backend/logs/error.log`.
+  - [x] Implementar rate limiting (5 req / 15 min) com `express-rate-limit` para `/api/auth/login` e `/api/auth/forgot-password`.
+  - [x] Implementar autenticação JWT (token 24h, verificação Bearer).
+  - [x] Implementar `POST /api/auth/register` (hash bcrypt custo 10, saldo inicial padrão R$ 0,00).
+  - [x] Implementar `POST /api/auth/login`.
+  - [x] Implementar `POST /api/auth/forgot-password` (geração de token SHA-256 e mock/integração com envio de e-mail).
+  - [x] Implementar `POST /api/auth/reset-password` (invalidação com `used = TRUE`).
+  - [x] Implementar `GET /api/users/me` e `PUT /api/users/me`.
+  - [x] Implementar `DELETE /api/users/me` com exclusão em cascata (RN10) e log de auditoria em `security_logs`.
 * **Critério de conclusão:** Todos os endpoints do Módulo de Autenticação e Usuário testados, protegidos por rate limiting e JWT, com auditoria e tratamento de erros funcionando.
 
 ---

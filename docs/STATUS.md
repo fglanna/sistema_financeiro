@@ -1,7 +1,7 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Fase 2: Banco de Dados, Migrations e Seeds** — **CONCLUÍDA**
+* **Fase 3: Backend Core — Autenticação, Usuários e Segurança** — **CONCLUÍDA**
 * **Controle de Versão e Backup (Git / GitHub)** — **CONFIGURADO & SEGURO**
 
 ---
@@ -22,38 +22,45 @@
 - [x] Cópia e disponibilização dos assets oficiais em [`frontend/public/assets/`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/frontend/public/assets/).
 - [x] Teste de compilação do frontend (`npm run build`) e teste do servidor backend (`/api/health`) executados com 100% de sucesso.
 - [x] Criação do [`.gitignore`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/.gitignore) personalizado e blindado para Node.js, React SPA, Docker, credenciais sensíveis e logs.
-- [x] Criação do [`.gitattributes`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/.gitattributes) para normalização de quebras de linha (LF) e identificação de binários.
 - [x] Inicialização do Git local (`git init` e branch `main`).
 
 ### Fase 2: Banco de Dados, Migrations e Seeds
-- [x] Criação da migration `update_updated_at_column` para atualização automática de timestamps (`20260929120001_create_update_timestamp_function.js`).
-- [x] Criação da migration da tabela `users` com id UUID gerado automaticamente e trigger de `updated_at` (`20260929120002_create_users_table.js`).
-- [x] Criação da migration da tabela `categories` com validação de tipo (`RECEITA`/`DESPESA`), constraint de propriedade `chk_category_owner` e trigger de `updated_at` (`20260929120003_create_categories_table.js`).
-- [x] Criação da migration da tabela `payment_methods` com chave primária `SMALLINT` para domínio fixo (`20260929120004_create_payment_methods_table.js`).
-- [x] Criação da migration da tabela `financial_transactions` com validações de montante positivo, integridade referencial (`ON DELETE CASCADE` para usuário, `ON DELETE RESTRICT` para categoria e forma de pagamento), constraint de consistência de status/data de pagamento `chk_payment_date_status` e trigger de `updated_at` (`20260929120005_create_financial_transactions_table.js`).
-- [x] Criação da migration da tabela `password_reset_tokens` para controle seguro de tokens de redefinição de uso único com expiração (`20260929120006_create_password_reset_tokens_table.js`).
-- [x] Criação da migration da tabela `security_logs` para auditoria de eventos sensíveis com campos `user_id` (`ON DELETE SET NULL`), `event_type`, `ip_address`, `user_agent` e `details` em JSONB (`20260929120007_create_security_logs_table.js`).
-- [x] Criação da migration para criação dos índices de otimização de performance: `idx_transactions_user_due`, `idx_transactions_user_status`, `idx_transactions_user_category` e `idx_categories_user_type` (`20260929120008_create_indexes.js`).
-- [x] Criação do seed `01_payment_methods.js` populando os 6 métodos de pagamento do domínio fixo: Pix, Cartão de Crédito, Cartão de Débito, Dinheiro, Boleto e Transferência.
-- [x] Criação do seed `02_default_categories.js` populando as 11 categorias padrão globais (`is_default = TRUE`, `user_id = NULL`): 4 de Receita (Salário, Freelance, Prestação de Serviços, Outras Receitas) e 7 de Despesa (Alimentação, Moradia, Transporte, Saúde, Lazer, Educação, Outras Despesas).
-- [x] Execução e validação de `npm run migrate` (8 migrations aplicadas com sucesso).
-- [x] Execução e validação de `npm run seed` (2 seed files aplicados com sucesso).
-- [x] Teste de idempotência e reversibilidade com `npm run migrate:rollback` e reaplicação com `npm run migrate; npm run seed`.
-- [x] Validação automatizada do schema no PostgreSQL (verificação de tabelas, colunas, triggers, chaves estrangeiras, constraints e registros iniciais).
+- [x] 8 migrations criadas e aplicadas (função trigger, tabelas `users`, `categories`, `payment_methods`, `financial_transactions`, `password_reset_tokens`, `security_logs` e índices).
+- [x] Seeds executados: 6 formas de pagamento e 11 categorias padrão inseridas.
+- [x] Todos os triggers, constraints e índices validados diretamente no PostgreSQL.
+
+### Fase 3: Backend Core — Autenticação, Usuários e Segurança
+- [x] Middleware global de erros (`errorHandler.js`) com gravação automática de stack traces em `backend/logs/error.log` e respostas genéricas seguras ao cliente.
+- [x] Middleware de rate limiting (`rateLimiter.js`) — 5 req / 15 min por IP — aplicado nas rotas `POST /api/auth/login` e `POST /api/auth/forgot-password` via `express-rate-limit`.
+- [x] Middleware de autenticação JWT (`auth.js`) — verificação do cabeçalho `Authorization: Bearer <token>`, injeção de `req.user.id` e `req.user.email`, tratamento de token expirado e inválido.
+- [x] `UserRepository` — `findByEmail`, `findById`, `create`, `update`, `delete` com queries parametrizadas via Knex.js.
+- [x] `TokenRepository` — `create`, `findByTokenHash`, `markAsUsed` para ciclo completo de tokens de recuperação de senha.
+- [x] `SecurityLogRepository` — `create` para registro de eventos de auditoria com `user_id`, `event_type`, `ip_address`, `user_agent` e `details` JSONB.
+- [x] `MailService` — envio de e-mail de recuperação de senha via nodemailer com fallback de log em desenvolvimento.
+- [x] `AuthService` — `register` (bcrypt custo 10 + validação de duplicidade + JWT), `login` (validação de hash), `forgotPassword` (token SHA-256 + expiração 1h + e-mail), `resetPassword` (validação de token + invalidação `used = TRUE`).
+- [x] `UserService` — `getProfile`, `updateProfile`, `deleteAccount` (auditoria prévia em `security_logs` + cascade).
+- [x] `AuthController` e `UserController` — delegação para serviços com tratamento de erros via `next(err)`.
+- [x] `authRoutes.js` — rotas `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password` com rate limiter aplicado nas sensíveis.
+- [x] `userRoutes.js` — rotas `GET/PUT/DELETE /api/users/me` protegidas por `authMiddleware`.
+- [x] `app.js` — Express com CORS restrito ao frontend, JSON body parser, registro das rotas e middleware de erro no final da cadeia.
+- [x] `server.js` — entrada do processo, escuta na porta configurada via `process.env.PORT`.
+- [x] **14 testes integrados automatizados** executados com 100% de sucesso (register, duplicidade, login válido/inválido, JWT, perfil, atualização, forgot-password, reset-password, reuso de token, nova senha, exclusão em cascata, auditoria).
+- [x] **Rate limiting** validado — 6ª tentativa recebe `429 Too Many Requests` com mensagem clara.
 
 ---
 
 ## 3. O que está em andamento
-- Preparação para a **Fase 3: Backend Core — Auth, Usuários & Segurança**.
+- Preparação para a **Fase 4: Backend Domínio — Categorias e Lançamentos Financeiros**.
 
 ---
 
 ## 4. Próximo Passo
-* **Fase 3:** Backend Core: Autenticação, Usuários e Segurança (`backend/src/config/config.js`, middlewares de autenticação JWT, rate limiting com `express-rate-limit`, errorHandler com logs em `backend/logs/error.log`, repositórios, serviços, controllers e rotas para registro, login, esqueci/redefinir senha, perfil e exclusão de conta em cascata com auditoria em `security_logs`).
+* **Fase 4:** Backend Domínio — Categorias e Lançamentos Financeiros (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js` — com validação RN08 de compatibilidade de tipo, CRUD completo de categorias e transações, rascunho de duplicação e endpoint de listagem).
 
 ---
 
 ## 5. Observações Importantes
-* O schema relacional DDL e os dados padrão foram implementados em estrita fidelidade com a Seção 8 do `docs/FSD.md`.
-* Todas as constraints de integridade e triggers de atualização automática estão ativos e validados no banco de dados.
-* Nenhuma biblioteca externa ou modificação fora de escopo foi adicionada.
+* Toda a camada de autenticação e controle de acesso foi construída em conformidade estrita com o FSD.
+* Senhas nunca trafegam em respostas; o payload JWT contém apenas `user_id` e `email`.
+* Rate limiting, auditoria em `security_logs` e exclusão em cascata (RN10) foram validados nos testes integrados.
+* O `MailService` opera em modo de mock (log no console) em desenvolvimento; a integração SMTP real é ativada ao configurar as variáveis SMTP no `.env`.
