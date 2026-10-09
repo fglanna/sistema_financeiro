@@ -9,6 +9,13 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
+// Trust Proxy: necessário em produção quando o servidor estiver atrás de proxy reverso
+// (Nginx, Cloudflare, etc.) para que o rate limiter identifique o IP real do cliente.
+// Ative via TRUST_PROXY=true no .env de produção.
+if (config.trustProxy) {
+  app.set('trust proxy', 1);
+}
+
 // Middlewares essenciais
 app.use(cors({
   origin: config.frontendUrl,
