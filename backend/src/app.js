@@ -20,7 +20,6 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    environment: config.nodeEnv,
     timestamp: new Date().toISOString()
   });
 });

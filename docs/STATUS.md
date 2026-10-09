@@ -2,6 +2,7 @@
 
 ## 1. Fase Atual
 * **Fase 3: Backend Core — Autenticação, Usuários e Segurança** — **CONCLUÍDA**
+* **Revisão de Segurança Parcial (Fase 3)** — **EXECUTADA EM 09/10/2026**
 * **Controle de Versão e Backup (Git / GitHub)** — **CONFIGURADO & SEGURO**
 
 ---
@@ -47,6 +48,18 @@
 - [x] **14 testes integrados automatizados** executados com 100% de sucesso (register, duplicidade, login válido/inválido, JWT, perfil, atualização, forgot-password, reset-password, reuso de token, nova senha, exclusão em cascata, auditoria).
 - [x] **Rate limiting** validado — 6ª tentativa recebe `429 Too Many Requests` com mensagem clara.
 
+### Revisão de Segurança Parcial — 09/10/2026 (Fases 1–3)
+- [x] **Revisão executada** cobrindo toda a base de código das Fases 1, 2 e 3.
+- [x] **Achados e gravidades identificados** — 4 corrigidos, restantes documentados como pendências de fases futuras.
+- [x] **Correções aplicadas:**
+  - `config.js`: Guarda de segurança que impede inicialização em produção com `JWT_SECRET` padrão/fraco, `DB_PASSWORD` padrão ou `FRONTEND_URL` de localhost. (INC-002 — **Crítico** → Corrigido)
+  - `app.js`: Campo `environment` removido do endpoint público `/api/health`. (INC-003 — **Baixo** → Corrigido)
+  - `mailService.js`: Log do modo mock não exibe mais o token real de reset. (INC-004 — **Médio** → Corrigido)
+  - `knexfile.js`: SSL em produção passa a usar `rejectUnauthorized: true` por padrão. (INC-005 — **Alto** → Corrigido)
+- [x] **`docs/ERROS.md` atualizado** com INC-002 a INC-005.
+- [x] **Commit de segurança** realizado na branch `main`.
+- [x] **Pendências de segurança identificadas** para as próximas fases (ver seção 5).
+
 ---
 
 ## 3. O que está em andamento
@@ -59,8 +72,20 @@
 
 ---
 
-## 5. Observações Importantes
+## 5. Observações Importantes e Pendências de Segurança
 * Toda a camada de autenticação e controle de acesso foi construída em conformidade estrita com o FSD.
 * Senhas nunca trafegam em respostas; o payload JWT contém apenas `user_id` e `email`.
 * Rate limiting, auditoria em `security_logs` e exclusão em cascata (RN10) foram validados nos testes integrados.
 * O `MailService` opera em modo de mock (log no console) em desenvolvimento; a integração SMTP real é ativada ao configurar as variáveis SMTP no `.env`.
+
+### Pendências de segurança para fases futuras:
+> **Para implementar nas Fases 4–7 (em construção):**
+> - Validação de UUIDs no servidor antes de qualquer consulta de `:id` nas rotas de categorias e transações.
+> - Isolamento estrito por `user_id` em TODOS os endpoints de categorias e transações (RN01).
+> - Validação de `category.type === transaction.type` na camada Service (RN08).
+> - Validação server-side de datas (`due_date`, `payment_date`) e status (`PAGO`/`PENDENTE`) em lançamentos (RN05).
+> - Rate limiting considerando uso de proxy reverso em produção (`app.set('trust proxy', 1)`).
+> - Token do frontend (`localStorage`) é acessível a JavaScript — considerar `httpOnly cookies` se o modelo de ameaça da produção exigir proteção adicional contra XSS.
+> - Configurar `DB_SSL_REJECT_UNAUTHORIZED` adequadamente ao provedor de banco de dados em produção.
+> - Implementar senha mínima mais forte (ex: 8 caracteres + complexidade) nas próximas fases, se o FSD for atualizado.
+

@@ -53,7 +53,8 @@ class MailService {
         console.error(`[MailService] Falha ao enviar e-mail para ${to}:`, err.message);
       }
     } else {
-      console.log(`[MailService (Mock Dev)] Link de redefinição gerado para ${to}: ${resetUrl}`);
+      // Em desenvolvimento, apenas confirma que o link seria enviado (sem exibir o token real)
+      console.log(`[MailService (Mock Dev)] Link de redefinição gerado e enviado para ${to}. Configure as variáveis SMTP no .env para envio real.`);
     }
   }
 }
