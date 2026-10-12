@@ -9,6 +9,9 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
+// Hardening de Segurança HTTP: remove header que expõe a stack Express
+app.disable('x-powered-by');
+
 // Trust Proxy: necessário em produção quando o servidor estiver atrás de proxy reverso
 // (Nginx, Cloudflare, etc.) para que o rate limiter identifique o IP real do cliente.
 // Ative via TRUST_PROXY=true no .env de produção.
@@ -21,7 +24,7 @@ app.use(cors({
   origin: config.frontendUrl,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
 // Rota de Health Check
 app.get('/api/health', (req, res) => {

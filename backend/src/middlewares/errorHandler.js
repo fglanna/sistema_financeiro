@@ -22,13 +22,16 @@ function errorHandler(err, req, res, next) {
     ? err.message 
     : 'Ocorreu um erro interno no processamento da solicitação.';
 
+  // Sanitização de dados sensíveis na URL antes de registrar no log
+  const sanitizedUrl = (req.originalUrl || '').replace(/([?&](token|password|secret|key)=)[^&]+/gi, '$1[REDACTED]');
+
   // Registro de log técnico em backend/logs/error.log
   const logDir = path.resolve(__dirname, '../../logs');
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
   }
 
-  const logEntry = `[${new Date().toISOString()}] [${req.method} ${req.originalUrl}] [Status: ${statusCode}] ${err.stack || err.message}\n`;
+  const logEntry = `[${new Date().toISOString()}] [${req.method} ${sanitizedUrl}] [Status: ${statusCode}] ${err.stack || err.message}\n`;
   const logPath = path.join(logDir, 'error.log');
 
   fs.appendFile(logPath, logEntry, (fsErr) => {
@@ -36,7 +39,7 @@ function errorHandler(err, req, res, next) {
   });
 
   if (process.env.NODE_ENV !== 'production') {
-    console.error(`[Error Handler] ${req.method} ${req.originalUrl} - Status ${statusCode}:`, err.message);
+    console.error(`[Error Handler] ${req.method} ${sanitizedUrl} - Status ${statusCode}:`, err.message);
   }
 
   return res.status(statusCode).json({

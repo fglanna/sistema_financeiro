@@ -60,6 +60,14 @@
 - [x] **Commit de segurança** realizado na branch `main`.
 - [x] **Pendências de segurança identificadas** para as próximas fases (ver seção 5).
 
+### Revisão de Segurança e Hardening Complementar — 12/10/2026
+- [x] **Correções complementares aplicadas:**
+  - `config.js` & `.env.example`: Leitura da flag `trustProxy: process.env.TRUST_PROXY === 'true'` adicionada a `config.js` e documentada em `.env.example`, garantindo que o rate limiter funcione atrás de proxies reversos (Nginx/Cloudflare) em produção.
+  - `app.js`: Desativação do header revelador `X-Powered-By: Express` via `app.disable('x-powered-by')` e definição explícita do limite de payload JSON para 100kb (`limit: '100kb'`).
+  - `errorHandler.js`: Sanitização ativa de URLs em logs, mascarando parâmetros confidenciais (`token`, `password`, `secret`, `key`) gravados em `backend/logs/error.log`.
+  - `validateUuid.js`: Criado middleware utilitário de validação defensiva de formato UUID para parâmetros `:id` de rotas, antecipando proteção para as Fases 4+.
+- [x] **`docs/ERROS.md` atualizado** com INC-006.
+
 ---
 
 ## 3. O que está em andamento
@@ -68,7 +76,7 @@
 ---
 
 ## 4. Próximo Passo
-* **Fase 4:** Backend Domínio — Categorias e Lançamentos Financeiros (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js` — com validação RN08 de compatibilidade de tipo, CRUD completo de categorias e transações, rascunho de duplicação e endpoint de listagem).
+* **Fase 4:** Backend Domínio — Categorias e Lançamentos Financeiros (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js` — com validação RN08 de compatibilidade de tipo, validação de UUIDs via `validateUuidParam`, CRUD completo de categorias e transações, rascunho de duplicação e endpoint de listagem).
 
 ---
 
@@ -80,12 +88,10 @@
 
 ### Pendências de segurança para fases futuras:
 > **Para implementar nas Fases 4–7 (em construção):**
-> - Validação de UUIDs no servidor antes de qualquer consulta de `:id` nas rotas de categorias e transações.
-> - Isolamento estrito por `user_id` em TODOS os endpoints de categorias e transações (RN01).
-> - Validação de `category.type === transaction.type` na camada Service (RN08).
-> - Validação server-side de datas (`due_date`, `payment_date`) e status (`PAGO`/`PENDENTE`) em lançamentos (RN05).
-> - Rate limiting considerando uso de proxy reverso em produção (`app.set('trust proxy', 1)`).
-> - Token do frontend (`localStorage`) é acessível a JavaScript — considerar `httpOnly cookies` se o modelo de ameaça da produção exigir proteção adicional contra XSS.
-> - Configurar `DB_SSL_REJECT_UNAUTHORIZED` adequadamente ao provedor de banco de dados em produção.
-> - Implementar senha mínima mais forte (ex: 8 caracteres + complexidade) nas próximas fases, se o FSD for atualizado.
+> - Aplicar o middleware `validateUuidParam` em todas as rotas que recebam `:id` (Fase 4).
+> - Isolamento estrito por `user_id` em TODOS os endpoints de categorias e transações (RN01) (Fase 4).
+> - Validação de `category.type === transaction.type` na camada Service (RN08) (Fase 4).
+> - Validação server-side de datas (`due_date`, `payment_date`) e status (`PAGO`/`PENDENTE`) em lançamentos (RN05) (Fase 4).
+> - Token do frontend (`localStorage`) é acessível a JavaScript — considerar `httpOnly cookies` se o modelo de ameaça da produção exigir proteção adicional contra XSS (Fases 6/7).
+
 
