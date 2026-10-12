@@ -130,16 +130,16 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `backend/src/routes/categoryRoutes.js`
   * `backend/src/routes/transactionRoutes.js`
 * **Checklist:**
-  - [ ] Implementar `GET /api/categories` (categorias padrão + personalizadas do usuário).
-  - [ ] Implementar `POST /api/categories` (criação de categoria personalizada).
-  - [ ] Implementar `PUT /api/categories/:id` com trava de alteração de `type` para categorias com lançamentos vinculados (RN08).
-  - [ ] Implementar `DELETE /api/categories/:id` com bloqueio para categorias com transações vinculadas (`ON DELETE RESTRICT`).
-  - [ ] Implementar `GET /api/payment-methods` (leitura do domínio fixo).
-  - [ ] Implementar `GET /api/transactions` com filtros por `month`, `year`, `search` e `category_id`.
-  - [ ] Implementar `POST /api/transactions` com validação de serviço `category.type === transaction.type` e consistência de `payment_date`/`status` (RN05, RN08).
-  - [ ] Implementar `GET /api/transactions/:id/duplicate-draft` retornando rascunho em memória com descrição original preservada e `status = PENDENTE`.
-  - [ ] Implementar `PUT /api/transactions/:id` com validação de compatibilidade de categoria e datas.
-  - [ ] Implementar `DELETE /api/transactions/:id` (exclusão física).
+  - [x] Implementar `GET /api/categories` (categorias padrão + personalizadas do usuário).
+  - [x] Implementar `POST /api/categories` (criação de categoria personalizada).
+  - [x] Implementar `PUT /api/categories/:id` com trava de alteração de `type` para categorias com lançamentos vinculados (RN08).
+  - [x] Implementar `DELETE /api/categories/:id` com bloqueio para categorias com transações vinculadas (`ON DELETE RESTRICT`).
+  - [x] Implementar `GET /api/payment-methods` (leitura do domínio fixo).
+  - [x] Implementar `GET /api/transactions` com filtros por `month`, `year`, `search` e `category_id`.
+  - [x] Implementar `POST /api/transactions` com validação de serviço `category.type === transaction.type` e consistência de `payment_date`/`status` (RN05, RN08).
+  - [x] Implementar `GET /api/transactions/:id/duplicate-draft` retornando rascunho em memória com descrição original preservada e `status = PENDENTE`.
+  - [x] Implementar `PUT /api/transactions/:id` com validação de compatibilidade de categoria e datas.
+  - [x] Implementar `DELETE /api/transactions/:id` (exclusão física).
 * **Critério de conclusão:** Todos os endpoints de categorias e transações testados com sucesso, regras de negócio RN01, RN05, RN08 e RN10 validadas.
 
 ---

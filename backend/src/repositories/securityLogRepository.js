@@ -17,6 +17,19 @@ class SecurityLogRepository {
 
     return log;
   }
+
+  /**
+   * Busca se já houve execução bem-sucedida do cron para a data civil especificada
+   * @param {string} executionDate Data no formato YYYY-MM-DD
+   */
+  async findDailyCronSuccess(executionDate) {
+    const record = await db('security_logs')
+      .where('event_type', 'CRON_DAILY_ALERTS_SUCCESS')
+      .whereRaw("details->>'execution_date' = ?", [executionDate])
+      .first();
+
+    return record || null;
+  }
 }
 
 module.exports = new SecurityLogRepository();

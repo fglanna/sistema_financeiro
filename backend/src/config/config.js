@@ -9,16 +9,26 @@ const INSECURE_JWT_DEFAULTS = [
 
 const jwtSecret = process.env.JWT_SECRET || 'chave_secreta_padrao_desenvolvimento';
 
-// Bloqueia inicialização em produção com JWT_SECRET inseguro
+// Bloqueia inicialização em produção com configurações inseguras
 if (process.env.NODE_ENV === 'production') {
   if (!process.env.JWT_SECRET || INSECURE_JWT_DEFAULTS.includes(jwtSecret) || jwtSecret.length < 32) {
     console.error('[SEGURANÇA CRÍTICA] JWT_SECRET não configurado ou inseguro em ambiente de produção. Configure uma chave aleatória com pelo menos 32 caracteres no arquivo .env.');
     process.exit(1);
   }
-  if (!process.env.DB_PASSWORD || process.env.DB_PASSWORD === 'postgres') {
-    console.error('[SEGURANÇA CRÍTICA] DB_PASSWORD não configurado ou usando senha padrão em ambiente de produção. Configure uma senha segura no arquivo .env.');
-    process.exit(1);
+
+  // Validação de banco: aceita DATABASE_URL ou credenciais individuais
+  if (process.env.DATABASE_URL) {
+    if (process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('postgres:postgres@')) {
+      console.error('[SEGURANÇA CRÍTICA] DATABASE_URL apontando para credenciais ou host padrão em ambiente de produção. Configure a URL do PostgreSQL gerenciado.');
+      process.exit(1);
+    }
+  } else {
+    if (!process.env.DB_PASSWORD || process.env.DB_PASSWORD === 'postgres') {
+      console.error('[SEGURANÇA CRÍTICA] DB_PASSWORD não configurado ou usando senha padrão em ambiente de produção. Configure uma senha segura no arquivo .env.');
+      process.exit(1);
+    }
   }
+
   if (!process.env.FRONTEND_URL || process.env.FRONTEND_URL.includes('localhost')) {
     console.error('[SEGURANÇA CRÍTICA] FRONTEND_URL não configurado para produção. Configure a URL real do frontend no arquivo .env.');
     process.exit(1);
@@ -30,17 +40,24 @@ const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   trustProxy: process.env.TRUST_PROXY === 'true',
+  databaseUrl: process.env.DATABASE_URL || null,
   db: {
+    connectionString: process.env.DATABASE_URL || null,
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 5432,
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'sistema_financeiro',
-    ssl: process.env.DB_SSL === 'true'
+    ssl: process.env.DB_SSL === 'true' || Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.includes('sslmode=require')),
+    sslRejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
   },
   jwt: {
     secret: jwtSecret,
     expiresIn: '24h'
+  },
+  cron: {
+    secret: process.env.CRON_SECRET || '',
+    timeoutMs: Number(process.env.CRON_TIMEOUT_MS) || 30000
   },
   smtp: {
     host: process.env.SMTP_HOST || 'smtp.mailtrap.io',

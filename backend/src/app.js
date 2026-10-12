@@ -6,6 +6,10 @@ const { errorHandler } = require('./middlewares/errorHandler');
 // Importação das rotas
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const paymentMethodRoutes = require('./routes/paymentMethodRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const cronRoutes = require('./routes/cronRoutes');
 
 const app = express();
 
@@ -37,6 +41,10 @@ app.get('/api/health', (req, res) => {
 // Módulos de Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/payment-methods', paymentMethodRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Middleware Global de Tratamento de Erros e Logs
 app.use(errorHandler);

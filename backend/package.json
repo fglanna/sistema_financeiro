@@ -8,7 +8,9 @@
     "dev": "nodemon src/server.js",
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "test": "node test-phase4.js",
+    "test:phase4": "node test-phase4.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

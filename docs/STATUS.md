@@ -1,14 +1,21 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Documentação Final de Manutenção & Modo Manutenção de Contexto** — **CONCLUÍDA EM 12/10/2026**
-* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds) e Fase 3 (Backend Core — Auth, Usuários e Segurança).
-* **Fases Funcionais Pendentes:** Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron), Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
-* **Revisão de Segurança:** Parcial realizada para Fases 1 a 3 (INC-002 a INC-006 resolvidos). Revisão de segurança final global pendente da conclusão das Fases 4 a 8.
+* **Preparação de Publicação (Vercel + Render + PostgreSQL Gerenciado)** — **CONCLUÍDA EM 12/10/2026**
+* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança) e Fase 4 (Backend Domínio — Categorias & Lançamentos).
+* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 5 (Backend Avançado — Dashboard, CSV & Notificações de E-mail), Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
+* **Revisão de Segurança:** Parcial realizada para Fases 1 a 4 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente das Fases 5 a 8.
 
 ---
 
 ## 2. O que já foi concluído
+
+### Preparação de Publicação para Vercel + Render + PostgreSQL Gerenciado (12/10/2026)
+- [x] Criação do guia definitivo de deploy e infraestrutura ([`docs/DEPLOY.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/DEPLOY.md)) cobrindo Vercel, Render, PostgreSQL e estratégias seguras de migrations em produção.
+- [x] Suporte híbrido a `DATABASE_URL` e variáveis individuais no [`backend/src/config/config.js`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/backend/src/config/config.js) e [`backend/knexfile.js`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/backend/knexfile.js) com validação de certificados SSL mantida como padrão (`rejectUnauthorized: true`).
+- [x] Criação da configuração de reescrita (*rewrite*) para SPA React no [`frontend/vercel.json`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/frontend/vercel.json) prevenindo erro 404 em recarregamentos diretos.
+- [x] Implementação da infraestrutura do Cron diário (RN07) via rota interna protegida por `CRON_SECRET` (`POST /api/cron/daily-alerts`), com autenticação timing-safe, idempotência por data de São Paulo registrada em `security_logs`, proteção contra disparos duplicados e timeout de segurança.
+- [x] Atualização da documentação de variáveis de ambiente no [`backend/.env.example`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/backend/.env.example).
 
 ### Documentação Final e Modo Manutenção (12/10/2026)
 - [x] Criação do [`docs/MANUTENCAO.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/MANUTENCAO.md) contendo visão geral, arquitetura, comandos reais, mapa detalhado de pastas, persistência/migrations, autenticação/permissões, passos para adicionar telas, campos e regras de negócio, testes e segurança.
@@ -62,6 +69,16 @@
 - [x] SSL do PostgreSQL com `rejectUnauthorized: true` por padrão (INC-005).
 - [x] Suporte a `TRUST_PROXY`, desativação de `X-Powered-By`, limite de payload de 100kb, sanitização de URLs em logs e middleware `validateUuid.js` (INC-006).
 
+### Fase 4: Backend Domínio — Categorias e Lançamentos Financeiros (12/10/2026)
+- [x] `PaymentMethodRepository` — `findAll` e `findById` para acesso ao domínio fixo.
+- [x] `CategoryRepository` — `findAllForUser`, `findByIdForUser`, `findCustomByIdAndUser`, `create`, `update`, `remove` e `hasLinkedTransactions` (para validação de restrições de negócio RN08).
+- [x] `TransactionRepository` — `findAll` com filtros (`month`, `year`, `search`, `category_id`), ordenação por `due_date ASC`, joins com categorias e formas de pagamento, `findById`, `create`, `update` e `remove` físico, com isolamento absoluto por `user_id` (RN01).
+- [x] `PaymentMethodService` e `PaymentMethodController` — consulta das 6 formas de pagamento do domínio fixo.
+- [x] `CategoryService` e `CategoryController` — listagem consolidada (padrão + personalizadas), criação com validação de tipo, edição com trava estrita de alteração de `type` para categorias que possuam lançamentos vinculados (RN08), bloqueio de alteração e exclusão de categorias padrão do sistema e bloqueio de exclusão para categorias com transações vinculadas.
+- [x] `TransactionService` e `TransactionController` — validação de integridade e valor (> 0), validação RN05 (obrigatoriedade de `due_date`, `payment_date` obrigatório se status `PAGO`, `payment_date = NULL` se `PENDENTE`), validação estrita RN08 (`category.type === transaction.type`), endpoint de rascunho de duplicação em memória (`GET /api/transactions/:id/duplicate-draft`) preservando a descrição original sem alteração e `status = PENDENTE`, atualização e exclusão física.
+- [x] Rotas registradas no Express: `categoryRoutes.js`, `paymentMethodRoutes.js` e `transactionRoutes.js`, protegidas por JWT e validação defensiva de UUID (`validateUuidParam`).
+- [x] **15 testes integrados automatizados** (`npm test` / `node test-phase4.js`) executados cobrindo fluxos felizes, isolamento multi-tenant, validações RN05, RN08, filtros, duplicação e exclusão, com 100% de sucesso.
+
 ---
 
 ## 3. Pendências Registradas
@@ -71,18 +88,17 @@
 > Por essa razão, a documentação foi estruturada para orientar com segurança o desenvolvimento e a manutenção tanto do código já implementado quanto das fases pendentes.
 
 ### Pendências Funcionais:
-1. **Fase 4 (Backend Domínio):** Implementação dos serviços, controladores e rotas de Categorias (`/api/categories`) e Transações (`/api/transactions`), com validação RN08 (tipo de categoria compatível com o lançamento) e endpoint de duplicação em rascunho de memória.
-2. **Fase 5 (Backend Avançado):** Endpoints do Dashboard (`/api/dashboard`) com fórmulas matemáticas RN02 e RN03, exportação CSV em stream de memória (`/api/transactions/export/csv`) e rotina agendada diária com `node-cron` e `nodemailer`.
-3. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
-4. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
-5. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
+1. **Fase 5 (Backend Avançado):** Endpoints do Dashboard (`/api/dashboard`) com fórmulas matemáticas RN02 e RN03, exportação CSV em stream de memória (`/api/transactions/export/csv`) e rotina agendada diária com `node-cron` e `nodemailer`.
+2. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
+3. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
+4. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
 
 ### Pendência de Segurança:
-* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 4 a 8, cobrindo o frontend completo, fluxo de arquivos CSV em memória, tokens em `localStorage` e rotinas do Cron.
+* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 5 a 8, cobrindo o frontend completo, fluxo de arquivos CSV em memória, tokens em `localStorage` e rotinas do Cron.
 
 ---
 
 ## 4. Próximo Passo Recomendado
 
-* **Continuidade do Desenvolvimento:** Iniciar a **Fase 4: Backend Domínio — Categorias e Lançamentos Financeiros** (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js`).
+* **Continuidade do Desenvolvimento:** Iniciar a **Fase 5: Backend Avançado — Dashboard, Exportação CSV e Worker Cron** (`dashboardService.js`, `csvExportService.js`, `mailService.js`, `notificationWorker.js`, `dashboardController.js`, `exportController.js`, `dashboardRoutes.js`, `exportRoutes.js`).
 * **Ou Publicação:** Caso o usuário opte por avançar diretamente para etapas de deploy/infraestrutura externa, iniciar novo chat dedicado com o prompt de publicação correspondente.
