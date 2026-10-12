@@ -1,13 +1,20 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Fase 3: Backend Core — Autenticação, Usuários e Segurança** — **CONCLUÍDA**
-* **Revisão de Segurança Parcial (Fase 3)** — **EXECUTADA EM 09/10/2026**
-* **Controle de Versão e Backup (Git / GitHub)** — **CONFIGURADO & SEGURO**
+* **Documentação Final de Manutenção & Modo Manutenção de Contexto** — **CONCLUÍDA EM 12/10/2026**
+* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds) e Fase 3 (Backend Core — Auth, Usuários e Segurança).
+* **Fases Funcionais Pendentes:** Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron), Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
+* **Revisão de Segurança:** Parcial realizada para Fases 1 a 3 (INC-002 a INC-006 resolvidos). Revisão de segurança final global pendente da conclusão das Fases 4 a 8.
 
 ---
 
 ## 2. O que já foi concluído
+
+### Documentação Final e Modo Manutenção (12/10/2026)
+- [x] Criação do [`docs/MANUTENCAO.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/MANUTENCAO.md) contendo visão geral, arquitetura, comandos reais, mapa detalhado de pastas, persistência/migrations, autenticação/permissões, passos para adicionar telas, campos e regras de negócio, testes e segurança.
+- [x] Criação do [`docs/COMO-PEDIR-MUDANCAS.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/COMO-PEDIR-MUDANCAS.md) com guia acessível para pessoas leigas, checklist de validação e 8 modelos de prompts concretos e adaptados à stack.
+- [x] Atualização de [`AGENTS.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/AGENTS.md) para o **Modo Manutenção**, definindo o protocolo de intervenção de 7 passos antes e 5 passos após cada alteração.
+- [x] Rastreamento das pendências funcionais e de segurança decorrentes das fases futuras do projeto.
 
 ### Fase 1: Preparação do Terreno e Infraestrutura Base
 - [x] Leitura detalhada e assimilação dos requisitos de `docs/FSD.md`, `docs/DESIGN.md` e `docs/INSUMOS.md`.
@@ -45,53 +52,37 @@
 - [x] `userRoutes.js` — rotas `GET/PUT/DELETE /api/users/me` protegidas por `authMiddleware`.
 - [x] `app.js` — Express com CORS restrito ao frontend, JSON body parser, registro das rotas e middleware de erro no final da cadeia.
 - [x] `server.js` — entrada do processo, escuta na porta configurada via `process.env.PORT`.
-- [x] **14 testes integrados automatizados** executados com 100% de sucesso (register, duplicidade, login válido/inválido, JWT, perfil, atualização, forgot-password, reset-password, reuso de token, nova senha, exclusão em cascata, auditoria).
-- [x] **Rate limiting** validado — 6ª tentativa recebe `429 Too Many Requests` com mensagem clara.
+- [x] **14 testes integrados automatizados** executados com 100% de sucesso.
+- [x] **Rate limiting** validado — 6ª tentativa recebe `429 Too Many Requests`.
 
-### Revisão de Segurança Parcial — 09/10/2026 (Fases 1–3)
-- [x] **Revisão executada** cobrindo toda a base de código das Fases 1, 2 e 3.
-- [x] **Achados e gravidades identificados** — 4 corrigidos, restantes documentados como pendências de fases futuras.
-- [x] **Correções aplicadas:**
-  - `config.js`: Guarda de segurança que impede inicialização em produção com `JWT_SECRET` padrão/fraco, `DB_PASSWORD` padrão ou `FRONTEND_URL` de localhost. (INC-002 — **Crítico** → Corrigido)
-  - `app.js`: Campo `environment` removido do endpoint público `/api/health`. (INC-003 — **Baixo** → Corrigido)
-  - `mailService.js`: Log do modo mock não exibe mais o token real de reset. (INC-004 — **Médio** → Corrigido)
-  - `knexfile.js`: SSL em produção passa a usar `rejectUnauthorized: true` por padrão. (INC-005 — **Alto** → Corrigido)
-- [x] **`docs/ERROS.md` atualizado** com INC-002 a INC-005.
-- [x] **Commit de segurança** realizado na branch `main`.
-- [x] **Pendências de segurança identificadas** para as próximas fases (ver seção 5).
-
-### Revisão de Segurança e Hardening Complementar — 12/10/2026
-- [x] **Correções complementares aplicadas:**
-  - `config.js` & `.env.example`: Leitura da flag `trustProxy: process.env.TRUST_PROXY === 'true'` adicionada a `config.js` e documentada em `.env.example`, garantindo que o rate limiter funcione atrás de proxies reversos (Nginx/Cloudflare) em produção.
-  - `app.js`: Desativação do header revelador `X-Powered-By: Express` via `app.disable('x-powered-by')` e definição explícita do limite de payload JSON para 100kb (`limit: '100kb'`).
-  - `errorHandler.js`: Sanitização ativa de URLs em logs, mascarando parâmetros confidenciais (`token`, `password`, `secret`, `key`) gravados em `backend/logs/error.log`.
-  - `validateUuid.js`: Criado middleware utilitário de validação defensiva de formato UUID para parâmetros `:id` de rotas, antecipando proteção para as Fases 4+.
-- [x] **`docs/ERROS.md` atualizado** com INC-006.
+### Revisão de Segurança Parcial e Hardening (09/10/2026 e 12/10/2026)
+- [x] Bloqueio de inicialização em produção com segredos fracos no `config.js` (INC-002).
+- [x] Ocultação de ambiente no health check `/api/health` (INC-003).
+- [x] Proteção de token de recuperação de senha em logs de desenvolvimento (INC-004).
+- [x] SSL do PostgreSQL com `rejectUnauthorized: true` por padrão (INC-005).
+- [x] Suporte a `TRUST_PROXY`, desativação de `X-Powered-By`, limite de payload de 100kb, sanitização de URLs em logs e middleware `validateUuid.js` (INC-006).
 
 ---
 
-## 3. O que está em andamento
-- Preparação para a **Fase 4: Backend Domínio — Categorias e Lançamentos Financeiros**.
+## 3. Pendências Registradas
+
+> **Aviso Importante sobre o Estado do Sistema:**
+> A documentação final de manutenção foi solicitada e gerada enquanto o projeto possui fases funcionais abertas no cronograma do [`docs/PLANO.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/PLANO.md).
+> Por essa razão, a documentação foi estruturada para orientar com segurança o desenvolvimento e a manutenção tanto do código já implementado quanto das fases pendentes.
+
+### Pendências Funcionais:
+1. **Fase 4 (Backend Domínio):** Implementação dos serviços, controladores e rotas de Categorias (`/api/categories`) e Transações (`/api/transactions`), com validação RN08 (tipo de categoria compatível com o lançamento) e endpoint de duplicação em rascunho de memória.
+2. **Fase 5 (Backend Avançado):** Endpoints do Dashboard (`/api/dashboard`) com fórmulas matemáticas RN02 e RN03, exportação CSV em stream de memória (`/api/transactions/export/csv`) e rotina agendada diária com `node-cron` e `nodemailer`.
+3. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
+4. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
+5. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
+
+### Pendência de Segurança:
+* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 4 a 8, cobrindo o frontend completo, fluxo de arquivos CSV em memória, tokens em `localStorage` e rotinas do Cron.
 
 ---
 
-## 4. Próximo Passo
-* **Fase 4:** Backend Domínio — Categorias e Lançamentos Financeiros (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js` — com validação RN08 de compatibilidade de tipo, validação de UUIDs via `validateUuidParam`, CRUD completo de categorias e transações, rascunho de duplicação e endpoint de listagem).
+## 4. Próximo Passo Recomendado
 
----
-
-## 5. Observações Importantes e Pendências de Segurança
-* Toda a camada de autenticação e controle de acesso foi construída em conformidade estrita com o FSD.
-* Senhas nunca trafegam em respostas; o payload JWT contém apenas `user_id` e `email`.
-* Rate limiting, auditoria em `security_logs` e exclusão em cascata (RN10) foram validados nos testes integrados.
-* O `MailService` opera em modo de mock (log no console) em desenvolvimento; a integração SMTP real é ativada ao configurar as variáveis SMTP no `.env`.
-
-### Pendências de segurança para fases futuras:
-> **Para implementar nas Fases 4–7 (em construção):**
-> - Aplicar o middleware `validateUuidParam` em todas as rotas que recebam `:id` (Fase 4).
-> - Isolamento estrito por `user_id` em TODOS os endpoints de categorias e transações (RN01) (Fase 4).
-> - Validação de `category.type === transaction.type` na camada Service (RN08) (Fase 4).
-> - Validação server-side de datas (`due_date`, `payment_date`) e status (`PAGO`/`PENDENTE`) em lançamentos (RN05) (Fase 4).
-> - Token do frontend (`localStorage`) é acessível a JavaScript — considerar `httpOnly cookies` se o modelo de ameaça da produção exigir proteção adicional contra XSS (Fases 6/7).
-
-
+* **Continuidade do Desenvolvimento:** Iniciar a **Fase 4: Backend Domínio — Categorias e Lançamentos Financeiros** (`categoryRepository.js`, `transactionRepository.js`, `paymentMethodRepository.js`, `categoryService.js`, `transactionService.js`, `categoryController.js`, `transactionController.js`, `categoryRoutes.js`, `transactionRoutes.js`).
+* **Ou Publicação:** Caso o usuário opte por avançar diretamente para etapas de deploy/infraestrutura externa, iniciar novo chat dedicado com o prompt de publicação correspondente.

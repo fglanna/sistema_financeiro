@@ -1,120 +1,97 @@
-# AGENTS.md — Guia Operacional para IAs e Desenvolvedores
+# AGENTS.md — Guia Operacional em Modo Manutenção
 
-Este documento estabelece as regras e convenções operacionais para agentes de IA e desenvolvedores que atuam no **Sistema de Controle Financeiro Pessoal**.
+Este documento estabelece as regras, convenções e o protocolo obrigatório de atuação para agentes de Inteligência Artificial e desenvolvedores encarregados da **manutenção contínua, correção de bugs e evolução** do **Sistema de Controle Financeiro Pessoal**.
 
----
-
-## 1. Documentos Oficiais de Referência
-
-Antes de iniciar qualquer tarefa ou alteração, é **obrigatório** consultar:
-
-* `docs/FSD.md`: Fonte primária de verdade técnica, arquitetura, schema DDL, regras de negócio e contratos de API.
-* `docs/DESIGN.md`: Sistema de design (*Executive Precision*), tokens de cores, tipografia e componentes.
-* `docs/INSUMOS.md`: Inventário e diretrizes de uso de arquivos e assets estáticos.
-* `docs/PLANO.md`: Planejamento sequencial e escopo de cada fase de desenvolvimento.
-* `docs/STATUS.md`: Registro da fase atual, entregas concluídas e próximos passos.
-* `docs/ERROS.md`: Registro de incidentes, causas identificadas e soluções aplicadas.
+> **Regra Primária de Comunicação:** Responda SEMPRE em **português do Brasil**.
 
 ---
 
-## 2. Stack Tecnológica e Arquitetura
+## 1. Documentos Obrigatórios de Referência
 
-* **Modelo:** Arquitetura desacoplada Fullstack JavaScript (SPA + API REST).
+Antes de planejar ou executar **qualquer alteração no código**, é **estritamente obrigatório** consultar os documentos oficiais do projeto na ordem abaixo:
+
+1. `docs/MANUTENCAO.md`: Guia de manutenção, mapa técnico detalhado, boas práticas e orientações para evolução do sistema.
+2. `docs/FSD.md`: Fonte primária de verdade técnica, arquitetura, schema DDL relacional, regras de negócio inegociáveis (RN01 a RN10) e contratos de API REST.
+3. `docs/DESIGN.md`: Sistema de design visual (*Executive Precision*), tokens de cores, tipografia (Plus Jakarta Sans / Inter), espaçamentos e elevações (obrigatório se a mudança envolver interface gráfica).
+4. `docs/STATUS.md`: Registro do estado atual do sistema, funcionalidades implementadas, fases em aberto e pendências.
+5. `docs/ERROS.md`: Registro histórico de incidentes catalogados (INC-001 em diante), causas-raiz identificadas e soluções aplicadas.
+
+---
+
+## 2. Stack Tecnológica e Arquitetura do Sistema
+
+* **Modelo Arquitetural:** Arquitetura desacoplada Fullstack JavaScript (SPA em React + API RESTful em Express.js).
 * **Backend:**
-  * Node.js (v18+) + Express.js.
-  * Banco de Dados: PostgreSQL.
-  * Camada de Dados: Knex.js Query Builder + Migrations / Seeds (driver `pg`).
-  * Autenticação & Criptografia: `jsonwebtoken` (JWT, expiração 24h) e `bcrypt` (fator de custo 10).
-  * Rate Limiting: `express-rate-limit` (5 req / 15 min nas rotas de login e recuperação de senha).
-  * Worker Background & E-mails: `node-cron` (disparo diário às 06:00 AM America/Sao_Paulo) e `nodemailer`.
+  * Node.js (v18+) com Express.js.
+  * Banco de Dados: PostgreSQL 16 (orquestrado via Docker Compose no desenvolvimento local).
+  * Camada de Persistência: Knex.js Query Builder + Migrations / Seeds (driver `pg`), organizado em Repositories com queries parametrizadas.
+  * Autenticação e Criptografia: `jsonwebtoken` (JWT com expiração de 24h, assinado com `JWT_SECRET`) e `bcrypt` (fator de custo 10).
+  * Rate Limiting: `express-rate-limit` (5 req / 15 min nas rotas `POST /api/auth/login` e `POST /api/auth/forgot-password`).
+  * Worker Background & Notificações: `node-cron` (agendamento diário às 06:00 AM no fuso `America/Sao_Paulo`) e `nodemailer`.
 * **Frontend:**
-  * React (SPA com Vite).
-  * Estilização: Tailwind CSS (configurado estritamente com os tokens de `docs/DESIGN.md`).
+  * React 18 (Single Page Application desenvolvida com Vite).
+  * Estilização: Tailwind CSS (estritamente mapeado para os tokens do `docs/DESIGN.md`).
   * Ícones: `lucide-react`.
-  * Visualização de Dados / Gráficos: `recharts`.
+  * Gráficos e Visualização: `recharts`.
+  * Numerais Tabulares: `tabular-nums` obrigatório em cards, métricas e tabelas de extrato.
 * **Infraestrutura Local:**
-  * Docker & Docker Compose para execução do container PostgreSQL.
+  * Docker Compose gerenciando PostgreSQL na porta mapeada `5433:5432` (para contornar instâncias locais nativas conforme INC-001).
 
 ---
 
-## 3. Estrutura de Pastas e Caminhos do Repositório
+## 3. Resumo da Estrutura de Pastas
 
-Todos os caminhos devem ser mantidos estritamente relativos à raiz do projeto:
+Todos os caminhos no repositório devem ser mantidos estritamente relativos à raiz do projeto:
 
 ```
-├── AGENTS.md
-├── docker-compose.yml
-├── assets/
-│   ├── logo.png
-│   └── logo_branca.png
-├── docs/
-│   ├── FSD.md
-│   ├── DESIGN.md
-│   ├── INSUMOS.md
-│   ├── PLANO.md
-│   ├── STATUS.md
-│   ├── ERROS.md
-│   ├── code.html
-│   └── screen.png
+├── AGENTS.md                  # Este guia operacional em modo manutenção
+├── docker-compose.yml         # Container PostgreSQL para desenvolvimento
+├── assets/                    # Logotipos oficiais (logo.png, logo_branca.png)
+├── docs/                      # Documentação viva do projeto
+│   ├── FSD.md                 # Especificação funcional completa e regras de negócio
+│   ├── DESIGN.md              # Design system Executive Precision
+│   ├── INSUMOS.md             # Inventário de insumos estáticos
+│   ├── PLANO.md               # Cronograma e fases de desenvolvimento
+│   ├── STATUS.md              # Estado atual de entregas e pendências
+│   ├── ERROS.md               # Registro de incidentes e soluções
+│   ├── MANUTENCAO.md          # Guia técnico de manutenção e evolução
+│   └── COMO-PEDIR-MUDANCAS.md # Modelos de prompts para solicitações de mudanças
 ├── backend/
-│   ├── .env.example
-│   ├── knexfile.js
-│   ├── package.json
+│   ├── .env.example           # Modelo de variáveis de ambiente
+│   ├── knexfile.js            # Configurações Knex para ambientes dev/test/prod
+│   ├── package.json           # Dependências e scripts do backend
 │   ├── logs/
-│   │   └── error.log
+│   │   └── error.log          # Log centralizado de erros da API
 │   └── src/
-│       ├── config/
-│       │   └── config.js
-│       ├── controllers/
-│       ├── cron/
-│       │   └── notificationWorker.js
-│       ├── database/
-│       │   ├── connection.js
-│       │   ├── migrations/
-│       │   └── seeds/
-│       ├── middlewares/
-│       │   ├── auth.js
-│       │   ├── errorHandler.js
-│       │   └── rateLimiter.js
-│       ├── repositories/
-│       ├── routes/
-│       ├── services/
-│       └── app.js
+│       ├── config/config.js   # Validação de segurança e leitura de ambiente
+│       ├── controllers/       # Recepção HTTP e respostas JSON
+│       ├── cron/              # Workers agendados (notificações)
+│       ├── database/          # Migrations, Seeds e conexão Knex
+│       ├── middlewares/       # Auth JWT, Rate Limit, Error Handler, UUID Validation
+│       ├── repositories/      # Queries SQL parametrizadas isoladas por user_id
+│       ├── routes/            # Definição e proteção de endpoints REST
+│       ├── services/          # Regras de negócio, cálculos financeiros e validações
+│       ├── app.js             # Configuração Express e middlewares
+│       └── server.js          # Inicialização do servidor HTTP
 └── frontend/
-    ├── .env.example
-    ├── index.html
-    ├── package.json
-    ├── postcss.config.js
-    ├── tailwind.config.js
-    ├── vite.config.js
-    ├── public/
+    ├── .env.example           # Modelo de variáveis de ambiente do frontend
+    ├── index.html             # HTML base com importação de fontes tipográficas
+    ├── package.json           # Dependências e scripts do frontend
+    ├── vite.config.js         # Configurações do Vite
+    ├── tailwind.config.js     # Tokens do Executive Precision
+    ├── public/assets/         # Logotipos e assets estáticos
     └── src/
-        ├── assets/
-        ├── components/
-        │   ├── common/
-        │   ├── dashboard/
-        │   ├── layout/
-        │   └── transactions/
-        ├── contexts/
-        │   └── AuthContext.jsx
-        ├── pages/
-        │   ├── Dashboard.jsx
-        │   ├── ForgotPassword.jsx
-        │   ├── Login.jsx
-        │   ├── Profile.jsx
-        │   ├── Register.jsx
-        │   ├── ResetPassword.jsx
-        │   └── Transactions.jsx
-        ├── services/
-        │   └── api.js
-        ├── App.jsx
-        ├── index.css
-        └── main.jsx
+        ├── components/        # Componentes reutilizáveis (common, dashboard, layout, transactions)
+        ├── contexts/          # Contextos React (AuthContext)
+        ├── pages/             # Telas da aplicação (Login, Register, Dashboard, Transactions, Profile)
+        ├── services/api.js    # Cliente Axios/Fetch com interceptors de autenticação
+        ├── App.jsx            # Roteamento da aplicação
+        └── main.jsx           # Ponto de montagem React
 ```
 
 ---
 
-## 4. Comandos Essenciais de Execução
+## 4. Comandos Reais de Execução e Manutenção
 
 ### 4.1. Infraestrutura do Banco de Dados
 * Iniciar PostgreSQL: `docker compose up -d`
@@ -122,78 +99,54 @@ Todos os caminhos devem ser mantidos estritamente relativos à raiz do projeto:
 
 ### 4.2. Backend
 * Instalar dependências: `cd backend && npm install`
-* Executar migrations: `cd backend && npm run migrate`
-* Executar seeds: `cd backend && npm run seed`
+* Aplicar novas migrations: `cd backend && npm run migrate`
 * Reverter última migration: `cd backend && npm run migrate:rollback`
-* Iniciar servidor em desenvolvimento: `cd backend && npm run dev`
-* Iniciar servidor em produção: `cd backend && npm start`
+* Aplicar seeds: `cd backend && npm run seed`
+* Executar em modo desenvolvimento: `cd backend && npm run dev`
+* Executar em produção: `cd backend && npm start`
 
 ### 4.3. Frontend
 * Instalar dependências: `cd frontend && npm install`
-* Iniciar servidor de desenvolvimento: `cd frontend && npm run dev`
+* Iniciar em desenvolvimento: `cd frontend && npm run dev`
 * Compilar build de produção: `cd frontend && npm run build`
 * Pré-visualizar build: `cd frontend && npm run preview`
 
 ---
 
-## 5. Diretrizes de Segurança e Boas Práticas
+## 5. Protocolo Obrigatório para Mudanças Futuras
 
-1. **Credenciais e Segredos:**
-   * Nunca versione senhas, segredos (`JWT_SECRET`) ou dados reais de conexão no repositório.
-   * Utilize arquivos `.env` locais baseados nos arquivos `.env.example`.
-2. **Senhas e Criptografia:**
-   * Todas as senhas devem ser criptografadas utilizando `bcrypt` com fator de custo 10.
-   * Senhas nunca devem trafegar ou ser exibidas em respostas de API ou logs.
-3. **Autenticação e Sessão:**
-   * Toda rota protegida exige o header `Authorization: Bearer <token_jwt>`.
-   * O payload do JWT deve conter apenas `user_id` e `email`.
-   * O frontend deve interceptar respostas `401 Unauthorized`, limpar a sessão e redirecionar para `/login`.
-4. **Isolamento de Dados (Multi-tenancy Lógico):**
-   * Toda consulta no banco de dados deve ser obrigatoriamente filtrada por `user_id` extraído do JWT validado (RN01).
-   * Apenas categorias padrão (`is_default = TRUE AND user_id IS NULL`) podem ser lidas por todos os usuários autenticados.
-5. **Proteção contra Injeção SQL:**
-   * Utilize exclusivamente o Knex.js com queries parametrizadas na camada de Repositories.
-6. **Controle de Taxa (Rate Limiting):**
-   * As rotas `POST /api/auth/login` e `POST /api/auth/forgot-password` devem aplicar o middleware `express-rate-limit` fixado em 5 requisições por janela de 15 minutos por IP.
-7. **CORS:**
-   * Permitir requisições estritamente a partir da URL configurada do frontend.
-8. **Tratamento e Logs de Erro:**
-   * O backend deve capturar exceções globalmente no middleware `errorHandler.js` e gravar mensagens e stack traces em `backend/logs/error.log`.
-   * As respostas HTTP de erro devem retornar mensagens seguras ao cliente, sem expor detalhes internos do banco de dados ou do servidor.
-9. **Auditoria de Eventos Críticos:**
-   * Ações sensíveis como exclusão de conta (RN10) devem registrar eventos na tabela `security_logs`.
+Toda IA ou desenvolvedor deve seguir rigorosamente este ciclo de trabalho:
+
+### Antes de qualquer alteração:
+1. **Ler `docs/MANUTENCAO.md`:** Entenda as convenções técnicas e o fluxo do módulo a ser alterado.
+2. **Ler `docs/FSD.md`:** Verifique as regras de negócio vigentes e o schema relacional.
+3. **Ler `docs/DESIGN.md`:** Verifique os tokens de design se a alteração envolver interface de usuário.
+4. **Ler `docs/STATUS.md`:** Confira o estado atual de implementação e pendências ativas.
+5. **Ler `docs/ERROS.md`:** Verifique se o problema já ocorreu no passado e como foi solucionado.
+6. **Entender o pedido do usuário:** Esclareça ambiguidades antes de propor soluções.
+7. **Explicar o plano antes de alterar arquivos:** Apresente ao usuário os arquivos que serão modificados e o racional da solução.
+
+### Depois de qualquer alteração:
+1. **Testar o que foi alterado:** Execute os testes manuais ou automatizados cobrindo fluxos felizes e cenários de erro.
+2. **Atualizar `docs/STATUS.md`:** Registre a alteração realizada, a data e o status do projeto.
+3. **Registrar erro e solução em `docs/ERROS.md`:** Se algum incidente ou bug ocorreu durante o processo, documente-o imediatamente.
+4. **Fazer commit ou entregar os comandos:** Verifique o `git status` para garantir que segredos não sejam versionados e monte um commit semântico.
+5. **Explicar ao usuário como validar:** Diga exatamente quais telas, botões ou comandos ele deve usar para validar a entrega no navegador.
 
 ---
 
-## 6. Regras de Negócio Inegociáveis (FSD)
+## 6. Diretrizes Inegociáveis de Segurança e Estabilidade
 
-* **RN01:** Isolamento estrito por `user_id` e leitura pública de categorias padrão.
-* **RN02:** Saldo Atual = Saldo Inicial + Total Receitas Pagas (`payment_date <= CURRENT_DATE`) - Total Despesas Pagas.
-* **RN03:** Saldo Previsto = Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês.
-* **RN04:** Saldo Inicial definido no cadastro ou perfil como ponto de partida histórico.
-* **RN05:** `due_date` é obrigatório; se `PAGO`, `payment_date` é obrigatório; se `PENDENTE`, `payment_date` deve ser `NULL`.
-* **RN06:** Lançamentos com `status = 'PENDENTE'` e `due_date < CURRENT_DATE` recebem destaque visual em vermelho.
-* **RN07:** O worker Cron de alertas por e-mail dispara diariamente às 06:00 AM (`America/Sao_Paulo`).
-* **RN08:** A camada Service valida `category.type === transaction.type`. Categorias personalizadas vinculadas a lançamentos não podem ter seu `type` alterado nem ser excluídas (`ON DELETE RESTRICT`).
-* **RN09:** Exportação CSV é gerada e transmitida diretamente via stream/buffer de memória, sem escrita de arquivos no disco.
-* **RN10:** Exclusão de usuário executa `DELETE FROM users WHERE id = :user_id` acionando `ON DELETE CASCADE` no PostgreSQL com prévio registro em `security_logs`.
-
----
-
-## 7. Diretrizes de Interface e Design System
-
-* Siga fielmente o padrão **Executive Precision** especificado em `docs/DESIGN.md`.
-* **Cores Principais:** Primary (`#4F46E5`), Secondary (`#1E293B`), Tertiary/Receitas (`#10B981` / `#059669`), Destructive/Despesas (`#F43F5E` / `#E11D48`), Fundo (`#F8FAFC`), Superfícies (`#FFFFFF`).
-* **Tipografia:** `Plus Jakarta Sans` para números, KPIs e títulos; `Inter` para tabelas e formulários.
-* **Numerais Tabulares:** Aplicar obrigatoriamente `font-variant-numeric: tabular-nums` (classe Tailwind `tabular-nums`) em tabelas, extratos e cards de saldos.
-* **Assets:** Utilizar os logotipos oficiais presentes em `assets/logo.png` e `assets/logo_branca.png`.
-
----
-
-## 8. Protocolo de Acompanhamento para Agentes de IA
-
-A cada sessão ou etapa de trabalho:
-1. **Antes de codificar:** Verifique `docs/STATUS.md` e o escopo da fase correspondente em `docs/PLANO.md`.
-2. **Durante a execução:** Siga estritamente as regras técnicas do `docs/FSD.md` e não introduza bibliotecas ou tecnologias não especificadas.
-3. **Se encontrar erros ou bloqueios:** Registre o incidente, a causa-raiz e a solução em `docs/ERROS.md`.
-4. **Ao finalizar uma etapa:** Atualize o `docs/STATUS.md` com o que foi entregue, o que está em andamento e o próximo passo.
+1. **Multi-tenancy e Isolamento de Dados (RN01):** Todo acesso ao banco de dados deve ser obrigatoriamente filtrado pelo `user_id` extraído do token JWT autenticado (`req.user.id`).
+2. **Proteção contra Injeção SQL:** Utilize exclusivamente queries parametrizadas via Knex.js na camada de Repositories.
+3. **Segurança de Senhas:** Criptografia com `bcrypt` (fator 10). Senhas e tokens nunca devem constar em respostas JSON ou arquivos de log.
+4. **Rate Limiting:** As rotas `POST /api/auth/login` e `POST /api/auth/forgot-password` devem obrigatoriamente preservar o limitador de 5 req / 15 min.
+5. **Preservação de Regras Financeiras:**
+   * **RN02:** Saldo Atual = Saldo Inicial + Receitas Pagas (`payment_date <= CURRENT_DATE`) - Despesas Pagas.
+   * **RN03:** Saldo Previsto = Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês.
+   * **RN05:** `due_date` é obrigatório; se `PAGO`, `payment_date` é obrigatório; se `PENDENTE`, `payment_date` deve ser `NULL`.
+   * **RN08:** `category.type === transaction.type` validado na camada de Service. Proibido alterar o tipo ou excluir categorias com lançamentos vinculados.
+   * **RN09:** Exportação CSV gerada diretamente em buffer de memória sem gravação em disco.
+   * **RN10:** Exclusão de usuário aciona `ON DELETE CASCADE` com auditoria em `security_logs`.
+6. **Não Quebrar Funcionalidades Existentes:** Nunca reescreva módulos inteiros sem necessidade. Mantenha compatibilidade com o schema e endpoints existentes.
+7. **Segredos e `.env`:** Nunca versionar arquivos com chaves privadas, senhas reais de banco ou credenciais SMTP.
