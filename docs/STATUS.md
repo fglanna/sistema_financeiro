@@ -1,10 +1,10 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Preparação de Publicação (Vercel + Render + PostgreSQL Gerenciado)** — **CONCLUÍDA EM 12/10/2026**
-* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança) e Fase 4 (Backend Domínio — Categorias & Lançamentos).
-* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 5 (Backend Avançado — Dashboard, CSV & Notificações de E-mail), Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
-* **Revisão de Segurança:** Parcial realizada para Fases 1 a 4 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente das Fases 5 a 8.
+* **Fase 5 (Backend Avançado: Dashboard, Exportação CSV e Worker Cron)** — **CONCLUÍDA EM 17/10/2026**
+* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos) e Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas).
+* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
+* **Revisão de Segurança:** Realizada para Fases 1 a 5 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente das Fases 6 a 8.
 
 ---
 
@@ -79,26 +79,31 @@
 - [x] Rotas registradas no Express: `categoryRoutes.js`, `paymentMethodRoutes.js` e `transactionRoutes.js`, protegidas por JWT e validação defensiva de UUID (`validateUuidParam`).
 - [x] **15 testes integrados automatizados** (`npm test` / `node test-phase4.js`) executados cobrindo fluxos felizes, isolamento multi-tenant, validações RN05, RN08, filtros, duplicação e exclusão, com 100% de sucesso.
 
+### Fase 5: Backend Avançado — Dashboard, Exportação CSV e Worker Cron (17/10/2026)
+- [x] `DashboardService` e `DashboardController` — implementação das fórmulas determinísticas de **Saldo Atual** (RN02: Saldo Inicial + Receitas Pagas com `payment_date <= CURRENT_DATE` - Despesas Pagas), **Saldo Previsto** (RN03: Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês), totais de entradas/saídas do mês, agregação percentual de despesas por categoria e lista de alertas de pendências com identificador `is_overdue`.
+- [x] `dashboardRoutes.js` — rota `GET /api/dashboard?month=MM&year=YYYY` protegida por autenticação JWT (RN01) e montada no `app.js`.
+- [x] `CsvExportService` e método `exportCsv` no `TransactionController` — geração de planilha CSV diretamente em memória em conformidade estrita com RFC 4180 e RN09 (sem arquivos temporários em disco), respeitando filtros aplicados de período, categoria e busca textual, com inclusão de BOM UTF-8 (`EF BB BF`), separador brasileiro (ponto e vírgula), valores formatados em moeda nacional e cabeçalhos `Content-Type: text/csv; charset=utf-8` e `Content-Disposition: attachment; filename="extrato_YYYY_MM.csv"`.
+- [x] Rota de exportação registrada no `transactionRoutes.js`: `GET /api/transactions/export/csv`.
+- [x] `cronService.js` — implementação da rotina real de varredura no PostgreSQL (`_runDailyAlertsLogic`) filtrando lançamentos com `status = 'PENDENTE'` e `due_date <= CURRENT_DATE`, agrupando pendências por usuário com dados de contato e calculando débitos em aberto.
+- [x] `mailService.js` — implementação do método `sendDailyAlertMail` disparando e-mails HTML responsivos formatados no padrão visual *Executive Precision*, contendo tabela de débitos, somatório total, identificação de vencidos e links diretos para o extrato.
+- [x] `notificationWorker.js` — inicialização do agendador automático `node-cron` programado para rodar diariamente às 06:00 AM no fuso horário `America/Sao_Paulo` (`0 6 * * *`) com parada segura (`stopNotificationWorker`) e acoplamento no `server.js`.
+- [x] Hardening de segurança do agendador: proteção em `config.js` exigindo que `CRON_SECRET` possua no mínimo 32 caracteres em ambiente de produção, preservando timing-safe auth via `crypto.timingSafeEqual` e idempotência registrada em `security_logs`.
+- [x] **Suíte completa de testes automatizados (`npm test`)** executando 15 testes da Fase 4 e testes avançados da Fase 5 (`test-phase5.js`) cobrindo 100% dos fluxos e regras RN01, RN02, RN03, RN07 e RN09 com sucesso.
+
 ---
 
 ## 3. Pendências Registradas
 
-> **Aviso Importante sobre o Estado do Sistema:**
-> A documentação final de manutenção foi solicitada e gerada enquanto o projeto possui fases funcionais abertas no cronograma do [`docs/PLANO.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/PLANO.md).
-> Por essa razão, a documentação foi estruturada para orientar com segurança o desenvolvimento e a manutenção tanto do código já implementado quanto das fases pendentes.
-
 ### Pendências Funcionais:
-1. **Fase 5 (Backend Avançado):** Endpoints do Dashboard (`/api/dashboard`) com fórmulas matemáticas RN02 e RN03, exportação CSV em stream de memória (`/api/transactions/export/csv`) e rotina agendada diária com `node-cron` e `nodemailer`.
-2. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
-3. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
-4. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
+1. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
+2. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
+3. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
 
 ### Pendência de Segurança:
-* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 5 a 8, cobrindo o frontend completo, fluxo de arquivos CSV em memória, tokens em `localStorage` e rotinas do Cron.
+* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 6 a 8, cobrindo o frontend completo, tokens em `localStorage` e fluxos de telas.
 
 ---
 
 ## 4. Próximo Passo Recomendado
 
-* **Continuidade do Desenvolvimento:** Iniciar a **Fase 5: Backend Avançado — Dashboard, Exportação CSV e Worker Cron** (`dashboardService.js`, `csvExportService.js`, `mailService.js`, `notificationWorker.js`, `dashboardController.js`, `exportController.js`, `dashboardRoutes.js`, `exportRoutes.js`).
-* **Ou Publicação:** Caso o usuário opte por avançar diretamente para etapas de deploy/infraestrutura externa, iniciar novo chat dedicado com o prompt de publicação correspondente.
+* **Continuidade do Desenvolvimento:** Iniciar a **Fase 6: Frontend — Design System, Autenticação e Layout Base** (`frontend/src/contexts/AuthContext.jsx`, `frontend/src/services/api.js`, `frontend/src/components/layout/AppLayout.jsx`, telas de autenticação `/login`, `/register`, `/forgot-password`, `/reset-password` e tela de perfil `/profile`).

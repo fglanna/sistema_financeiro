@@ -9,6 +9,7 @@ const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const paymentMethodRoutes = require('./routes/paymentMethodRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const cronRoutes = require('./routes/cronRoutes');
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/payment-methods', paymentMethodRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/cron', cronRoutes);
 
 // Middleware Global de Tratamento de Erros e Logs

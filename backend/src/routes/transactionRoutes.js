@@ -10,6 +10,9 @@ router.use(authMiddleware);
 // Obter lançamentos financeiros do usuário (com filtros por mês, ano, busca, categoria)
 router.get('/', transactionController.getAll);
 
+// Exportar lançamentos financeiros em CSV em memória (RN09)
+router.get('/export/csv', (req, res, next) => transactionController.exportCsv(req, res, next));
+
 // Criar novo lançamento financeiro (RN05, RN08)
 router.post('/', transactionController.create);
 

@@ -158,11 +158,11 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `backend/src/routes/dashboardRoutes.js`
   * `backend/src/routes/exportRoutes.js`
 * **Checklist:**
-  - [ ] Implementar cálculo de Saldo Atual (RN02: Saldo Inicial + Receitas Pagas com `payment_date <= CURRENT_DATE` - Despesas Pagas).
-  - [ ] Implementar cálculo de Saldo Previsto (RN03: Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês).
-  - [ ] Implementar agregação de despesas por categoria e lista de alertas para `GET /api/dashboard`.
-  - [ ] Implementar `GET /api/transactions/export/csv` gerando arquivo diretamente em memória sem gravação em disco (RN09).
-  - [ ] Implementar worker diário agendado via `node-cron` para as 06:00 AM (`America/Sao_Paulo`) identificando contas pendentes vencidas ou do dia e disparando e-mails via `nodemailer` (RN07).
+  - [x] Implementar cálculo de Saldo Atual (RN02: Saldo Inicial + Receitas Pagas com `payment_date <= CURRENT_DATE` - Despesas Pagas).
+  - [x] Implementar cálculo de Saldo Previsto (RN03: Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês).
+  - [x] Implementar agregação de despesas por categoria e lista de alertas para `GET /api/dashboard`.
+  - [x] Implementar `GET /api/transactions/export/csv` gerando arquivo diretamente em memória sem gravação em disco (RN09).
+  - [x] Implementar worker diário agendado via `node-cron` para as 06:00 AM (`America/Sao_Paulo`) identificando contas pendentes vencidas ou do dia e disparando e-mails via `nodemailer` (RN07).
 * **Critério de conclusão:** Endpoint de Dashboard retornando KPIs exatos, exportação CSV funcionando via download direto por stream, e cron configurado e disparável.
 
 ---

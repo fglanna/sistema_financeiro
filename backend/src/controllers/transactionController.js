@@ -70,6 +70,27 @@ class TransactionController {
       return next(err);
     }
   }
+
+  async exportCsv(req, res, next) {
+    try {
+      const csvExportService = require('../services/csvExportService');
+      const userId = req.user.id;
+      const { month, year, search, category_id } = req.query;
+
+      const { filename, csvContent } = await csvExportService.generateTransactionsCsv(userId, {
+        month,
+        year,
+        search,
+        category_id,
+      });
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.status(200).send(Buffer.from(csvContent, 'utf-8'));
+    } catch (err) {
+      return next(err);
+    }
+  }
 }
 
 module.exports = new TransactionController();

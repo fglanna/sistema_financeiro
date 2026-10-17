@@ -33,6 +33,11 @@ if (process.env.NODE_ENV === 'production') {
     console.error('[SEGURANÇA CRÍTICA] FRONTEND_URL não configurado para produção. Configure a URL real do frontend no arquivo .env.');
     process.exit(1);
   }
+
+  if (!process.env.CRON_SECRET || process.env.CRON_SECRET.length < 32) {
+    console.error('[SEGURANÇA CRÍTICA] CRON_SECRET não configurado ou com menos de 32 caracteres em ambiente de produção. Configure uma chave segura no arquivo .env.');
+    process.exit(1);
+  }
 }
 
 const config = {
@@ -56,7 +61,7 @@ const config = {
     expiresIn: '24h'
   },
   cron: {
-    secret: process.env.CRON_SECRET || '',
+    secret: process.env.CRON_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'cron_secret_padrao_desenvolvimento_32chars'),
     timeoutMs: Number(process.env.CRON_TIMEOUT_MS) || 30000
   },
   smtp: {

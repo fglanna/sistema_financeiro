@@ -90,18 +90,104 @@ class CronService {
   }
 
   /**
-   * Lógica interna de verificação e envio (Ponto de Extensão das Fases 4 e 5)
-   * Na Fase 5, este bloco executará a consulta aos lançamentos pendentes
-   * e o disparo de e-mails via Nodemailer.
+   * Lógica interna de verificação e envio dos alertas diários (RN07)
+   * Busca todas as transações com status = 'PENDENTE' e due_date <= CURRENT_DATE,
+   * agrupa por usuário e dispara os e-mails com as pendências.
    */
   async _runDailyAlertsLogic(executionDate) {
-    // Ponto de integração: Quando a Fase 5 for implementada,
-    // as consultas aos débitos com status 'PENDENTE' e due_date <= CURRENT_DATE
-    // e os envios de e-mails em lote serão executados aqui.
+    const db = require('../database/connection');
+    const mailService = require('./mailService');
+
+    // 1. Consulta todas as transações pendentes com vencimento até hoje
+    const pendingTransactions = await db('financial_transactions as ft')
+      .select(
+        'ft.id',
+        'ft.user_id',
+        'ft.description',
+        'ft.amount',
+        'ft.type',
+        'ft.due_date',
+        'ft.status',
+        'c.name as category_name',
+        'u.name as user_name',
+        'u.email as user_email'
+      )
+      .join('users as u', 'ft.user_id', 'u.id')
+      .leftJoin('categories as c', 'ft.category_id', 'c.id')
+      .where('ft.status', 'PENDENTE')
+      .whereRaw('ft.due_date <= ?', [executionDate])
+      .orderBy(['ft.user_id', 'ft.due_date']);
+
+    if (!pendingTransactions || pendingTransactions.length === 0) {
+      return {
+        processedUsers: 0,
+        pendingAlertsCount: 0,
+        message: 'Nenhum lançamento pendente com vencimento expirado ou na data atual foi encontrado.'
+      };
+    }
+
+    // 2. Agrupa por usuário
+    const userMap = new Map();
+
+    for (const tx of pendingTransactions) {
+      if (!userMap.has(tx.user_id)) {
+        userMap.set(tx.user_id, {
+          userId: tx.user_id,
+          userName: tx.user_name,
+          userEmail: tx.user_email,
+          alerts: []
+        });
+      }
+
+      const dueDateStr = tx.due_date instanceof Date
+        ? tx.due_date.toISOString().split('T')[0]
+        : String(tx.due_date).split('T')[0];
+
+      const isOverdue = dueDateStr < executionDate;
+
+      userMap.get(tx.user_id).alerts.push({
+        id: tx.id,
+        description: tx.description,
+        amount: parseFloat(tx.amount),
+        type: tx.type,
+        due_date: dueDateStr,
+        category_name: tx.category_name,
+        is_overdue: isOverdue
+      });
+    }
+
+    // 3. Dispara os e-mails para cada usuário com pendências
+    let emailsSentCount = 0;   // sucessos reais (SMTP) ou mocks (dev)
+    let emailsFailedCount = 0; // falhas de envio SMTP
+    for (const [userId, userData] of userMap.entries()) {
+      try {
+        const result = await mailService.sendDailyAlertMail({
+          to: userData.userEmail,
+          name: userData.userName,
+          pendingAlerts: userData.alerts,
+          executionDate
+        });
+        // sent: true  → SMTP real com sucesso
+        // sent: 'mock' → modo dev sem credenciais reais (simulação)
+        if (result && (result.sent === true || result.sent === 'mock')) {
+          emailsSentCount++;
+        } else {
+          // sent: false → falha SMTP com credenciais reais
+          emailsFailedCount++;
+          console.error(`[CronService] Falha de envio SMTP para usuário ${userId} (${userData.userEmail}): ${result && result.error ? result.error : 'Erro desconhecido'}`);
+        }
+      } catch (mailErr) {
+        emailsFailedCount++;
+        console.error(`[CronService] Exceção ao enviar e-mail de alerta para usuário ${userId} (${userData.userEmail}):`, mailErr.message);
+      }
+    }
+
     return {
-      processedUsers: 0,
-      pendingAlertsCount: 0,
-      info: 'Preparação de infraestrutura do Cron concluída. Consultas de lançamentos serão ativadas na Fase 5.'
+      processedUsers: userMap.size,
+      pendingAlertsCount: pendingTransactions.length,
+      emailsSentCount,
+      emailsFailedCount,
+      message: `Alertas processados para ${userMap.size} usuário(s) com ${pendingTransactions.length} pendência(s). Enviados: ${emailsSentCount}, Falhas: ${emailsFailedCount}.`
     };
   }
 }

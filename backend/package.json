@@ -9,8 +9,9 @@
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
     "seed": "knex seed:run",
-    "test": "node test-phase4.js",
-    "test:phase4": "node test-phase4.js"
+    "test": "node test-phase4.js && node test-phase5.js",
+    "test:phase4": "node test-phase4.js",
+    "test:phase5": "node test-phase5.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
