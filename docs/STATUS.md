@@ -90,6 +90,14 @@
 - [x] Hardening de segurança do agendador: proteção em `config.js` exigindo que `CRON_SECRET` possua no mínimo 32 caracteres em ambiente de produção, preservando timing-safe auth via `crypto.timingSafeEqual` e idempotência registrada em `security_logs`.
 - [x] **Suíte completa de testes automatizados (`npm test`)** executando 15 testes da Fase 4 e testes avançados da Fase 5 (`test-phase5.js`) cobrindo 100% dos fluxos e regras RN01, RN02, RN03, RN07 e RN09 com sucesso.
 
+### Revisão SMTP e Correção de Contagem de E-mails (17/10/2026 — INC-007)
+- [x] Correção de `mailService.js` — detecção de credenciais SMTP placeholder (`seu_usuario_smtp`, `your_smtp_user`) no `initTransporter()`, ativando modo mock automaticamente em ambientes sem SMTP real configurado.
+- [x] Correção de `mailService.js` — `sendDailyAlertMail` agora retorna status explícito (`{ sent: true }`, `{ sent: false, error }` ou `{ sent: 'mock' }`) para que o caller distinga sucesso real de falha.
+- [x] Correção de `cronService.js` — loop de envio distingue `emailsSentCount` (sucessos + mock) de `emailsFailedCount` (falhas SMTP), usando o retorno de `sendDailyAlertMail`.
+- [x] Correção de `test-phase5.js` — assertions do Cron não validam mais `emailsSentCount >= 1` como prova de envio real. Verificam `totalAttempts >= 1` e `emailsFailedCount === 0`.
+- [x] `npm test` executado com **100% de sucesso** e **zero erros SMTP** no output (modo mock ativo).
+- [ ] **Pendência:** Validação de envio real de e-mails com SMTP configurado (credenciais reais no `.env`) será feita manualmente pelo usuário em ambiente de produção.
+
 ---
 
 ## 3. Pendências Registradas

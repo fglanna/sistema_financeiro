@@ -12,6 +12,7 @@ Este documento registra os erros encontrados durante o ciclo de vida do projeto,
 | INC-004 | 09/10/2026 | mailService.js / Tokens | Token de redefinição de senha vazava no console em ambiente de desenvolvimento. | O modo mock do `MailService` logava a URL completa de reset (incluindo o token bruto) com `console.log`. | Log alterado para exibir apenas confirmação de geração sem revelar a URL ou o token. O token em texto claro nunca deve aparecer em logs. | Resolvido |
 | INC-005 | 09/10/2026 | knexfile.js / SSL | Configuração SSL de banco em produção usava `rejectUnauthorized: false`, desativando verificação de certificado. | O valor hardcoded `{ rejectUnauthorized: false }` foi mantido como padrão ao ativar `DB_SSL=true`, expondo conexões a ataques man-in-the-middle. | Alterado para `rejectUnauthorized: true` por padrão. Pode ser sobrescrito via `DB_SSL_REJECT_UNAUTHORIZED=false` apenas quando o ambiente gerenciado utilizar certificado auto-assinado (ex: alguns provedores cloud). | Resolvido |
 | INC-006 | 12/10/2026 | app.js / config.js / Segurança | Configuração de trustProxy inativa em config.js e cabeçalho X-Powered-By ativo revelando a stack Express. | `config.js` não expunha `trustProxy`, impedindo o rate limiter de capturar IP real atrás de proxies; cabeçalho `X-Powered-By` não estava desativado. | `trustProxy: process.env.TRUST_PROXY === 'true'` exportado no `config.js` e documentado no `.env.example`, `app.disable('x-powered-by')` adicionado, limite de 100kb fixado no body parser, sanitização de URLs em logs no `errorHandler.js` e criação do middleware `validateUuid.js`. | Resolvido |
+| INC-007 | 17/10/2026 | mailService.js / cronService.js / SMTP | Credenciais SMTP placeholder (`seu_usuario_smtp`) causavam tentativas de autenticação real com erro `535 Invalid credentials`. `emailsSentCount` era incrementado mesmo em falha SMTP pois `sendDailyAlertMail` não retornava status ao caller. | `.env` continha valores placeholder não vazios, fazendo `initTransporter()` criar transporter real. `sendDailyAlertMail` capturava o erro internamente sem relançar ou retornar status. | `initTransporter()` agora detecta credenciais placeholder e ativa modo mock. `sendDailyAlertMail` retorna `{ sent: true/false/'mock' }`. `cronService` distingue `emailsSentCount` de `emailsFailedCount`. Teste ajustado para não validar envio real sem SMTP configurado. | Resolvido |
 
 ---
 
@@ -70,6 +71,19 @@ Este documento registra os erros encontrados durante o ciclo de vida do projeto,
   3. Sanitização automática de URLs em `errorHandler.js` mascarando parâmetros como `token`, `password`, `secret` e `key`.
   4. Criação do middleware `validateUuid.js` para validação preventiva de identificadores de rotas.
 - **Como evitar no futuro:** Sempre ocultar assinaturas de framework em cabeçalhos HTTP, prever arquiteturas de proxy reverso e mascarar qualquer dado potencialmente confidencial antes de gravar logs em disco.
+
+---
+
+## 17/10/2026 - Credenciais SMTP placeholder causando tentativas de autenticação real
+
+- **Sintoma:** Durante `npm test`, apareciam erros `Invalid login: 535 5.7.0 Invalid credentials` e `Too many failed login attempts` no output, mesmo com o teste do Cron sendo aprovado.
+- **Causa:** O arquivo `.env` continha valores placeholder não vazios (`SMTP_HOST=smtp.mailtrap.io`, `SMTP_USER=seu_usuario_smtp`), fazendo o `initTransporter()` do `MailService` criar um transporter real e tentar autenticação SMTP com credenciais falsas. Além disso, `sendDailyAlertMail` capturava o erro SMTP internamente sem retornar status de falha ao caller, e o `cronService` incrementava `emailsSentCount` mesmo quando o envio falhava.
+- **Solução aplicada:**
+  1. `mailService.js` — `initTransporter()` agora verifica se as credenciais SMTP são valores placeholder conhecidos (`seu_usuario_smtp`, `your_smtp_user`, etc.) e só cria o transporter com credenciais reais. Caso contrário, ativa o modo mock com log informativo.
+  2. `mailService.js` — `sendDailyAlertMail` agora retorna `{ sent: true }` em sucesso SMTP real, `{ sent: false, error }` em falha SMTP e `{ sent: 'mock' }` em modo desenvolvimento.
+  3. `cronService.js` — Usa o retorno explícito de `sendDailyAlertMail` para distinguir `emailsSentCount` (sucessos reais + mock) de `emailsFailedCount` (falhas SMTP).
+  4. `test-phase5.js` — Assertion corrigida: não valida mais `emailsSentCount >= 1` como prova de envio real. Verifica que `totalAttempts >= 1` e que `emailsFailedCount === 0` (correto em modo mock ou com SMTP real funcionando).
+- **Como evitar no futuro:** Sempre validar se credenciais de serviços externos são placeholders antes de inicializar conexões reais. Métodos de envio devem retornar status explícito de sucesso/falha para que o caller possa contabilizar corretamente.
 
 ---
 
