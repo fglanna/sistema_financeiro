@@ -231,12 +231,12 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * Todo o backend e frontend.
   * `backend/logs/error.log`
 * **Checklist:**
-  - [ ] Testar fluxo de cadastro, login, esqueci a senha e redefinição.
-  - [ ] Testar rate limiting em rotas de auth (bloqueio na 6ª tentativa em 15 minutos).
-  - [ ] Validar RN02 e RN03 (cálculos exatos de saldos atual e previsto com datas de corte).
-  - [ ] Validar RN08 (tentativa de criar despesa com categoria de receita, tentativa de alterar tipo de categoria com lançamentos vinculados).
-  - [ ] Validar duplicação de lançamento (rascunho sem alterar descrição original).
-  - [ ] Validar exclusão em cascata de usuário (RN10) e inserção em `security_logs`.
-  - [ ] Validar exportação CSV com filtros aplicados.
-  - [ ] Verificar integridade do arquivo de log `backend/logs/error.log`.
-* **Critério de conclusão:** Sistema aprovado em 100% dos cenários de teste, sem regressões ou inconsistências.
+  - [x] Testar fluxo de cadastro, login, esqueci a senha e redefinição.
+  - [x] Testar rate limiting em rotas de auth (bloqueio na 6ª tentativa em 15 minutos).
+  - [x] Validar RN02 e RN03 (cálculos exatos de saldos atual e previsto com datas de corte).
+  - [x] Validar RN08 (tentativa de criar despesa com categoria de receita, tentativa de alterar tipo de categoria com lançamentos vinculados).
+  - [x] Validar duplicação de lançamento (rascunho sem alterar descrição original).
+  - [x] Validar exclusão em cascata de usuário (RN10) e inserção em `security_logs`.
+  - [x] Validar exportação CSV com filtros aplicados.
+  - [x] Verificar integridade do arquivo de log `backend/logs/error.log`.
+* **Critério de conclusão:** Sistema aprovado em 100% dos cenários de teste, sem regressões ou inconsistências (Concluído em 26/10/2026).

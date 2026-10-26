@@ -1,10 +1,10 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Fase 7 (Frontend: Dashboard, Extrato, Modais e Exportação CSV)** — **CONCLUÍDA EM 26/10/2026**
-* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas), Fase 6 (Frontend — Design System, Auth & Layout Base) e Fase 7 (Frontend: Dashboard, Extrato, Modais e CSV).
-* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 8 (Testes Integrados, Validação & Hardening Final).
-* **Revisão de Segurança:** Realizada para Fases 1 a 6 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente da Fase 8.
+* **Fase 8 (Testes Integrados, Validação de Regras e Hardening Final)** — **CONCLUÍDA EM 26/10/2026**
+* **Fases Funcionais Concluídas:** Todas as 8 fases do projeto concluídas com 100% de sucesso (Fase 1: Infraestrutura, Fase 2: Banco de Dados/Migrations/Seeds, Fase 3: Backend Core, Fase 4: Backend Domínio, Fase 5: Backend Avançado, Fase 6: Frontend Auth/Layout, Fase 7: Frontend Operacional e Fase 8: Testes Integrados/Hardening).
+* **Fases Funcionais Pendentes:** Nenhuma. Todas as fases previstas no `docs/PLANO.md` foram totalmente construídas e aprovadas.
+* **Revisão de Segurança:** Concluída para todas as camadas do sistema (autenticação JWT, senhas bcrypt custo 10, rate limiting, queries parametrizadas Knex, multi-tenancy RN01, proteção de headers HTTP, limite de body 100kb, validação de UUID, logs higienizados sem credenciais e auditoria em `security_logs`).
 
 ---
 
@@ -127,18 +127,62 @@
 - [x] Criação da suíte automatizada `backend/test-phase7.js` validando todos os fluxos de ponta a ponta integrada ao `npm test`.
 - [x] Validação do build de produção via `npm run build` no frontend com 100% de sucesso.
 
+### Fase 8: Testes Integrados, Validação de Regras e Hardening Final (26/10/2026)
+- [x] Criação do script de testes integrados e hardening `backend/test-phase8.js` e acoplamento ao comando `npm test`.
+- [x] Validação de cabeçalhos HTTP: remoção confirmada do header `X-Powered-By` (`app.disable('x-powered-by')`) e endpoint público `/api/health` estritamente minimalista sem expor ambientes.
+- [x] Validação do fluxo de autenticação e contas: cadastro seguro com hash bcrypt custo 10, rejeição de duplicidade (409 Conflict), emissão de JWT com 24h de validade, bloqueio de senhas incorretas e rejeição de tokens forjados ou ausentes (401 Unauthorized).
+- [x] Validação do ciclo de redefinição de senha: solicitação via `POST /api/auth/forgot-password`, geração de hash SHA-256 no banco com expiração de 1h e `used = false`, redefinição com nova senha, invalidação imediata do token (`used = true`), bloqueio estrito contra reutilização de token consumido (400 Bad Request) e login imediato com a nova credencial.
+- [x] Validação estrita de Rate Limiting: 5 requisições em 15 minutos por IP no `POST /api/auth/login`, com bloqueio imediato na tentativa subsequente retornando status `429 Too Many Requests`.
+- [x] Validação de regras de negócio de categorias e compatibilidade (RN08):
+  - Bloqueio de edição e exclusão de categorias padrão (`is_default = true`).
+  - Criação de categoria personalizada com tipo validado.
+  - Rejeição na camada Service de lançamentos com tipos incompatíveis (`category.type !== transaction.type`).
+  - Bloqueio de alteração de `type` em categorias personalizadas que possuam lançamentos vinculados.
+  - Bloqueio de exclusão (`ON DELETE RESTRICT`) para categorias com lançamentos vinculados.
+- [x] Validação estrita de multi-tenancy e isolamento de domínio (RN01):
+  - Usuários não têm acesso a categorias personalizadas de terceiros.
+  - Tentativa de consulta, duplicação, edição ou exclusão de transações de outro usuário rejeitadas com 404 Not Found.
+- [x] Validação de consistência de datas e status (RN05):
+  - `due_date` obrigatório.
+  - Lançamento com status `PAGO` exige obrigatoriamente `payment_date`.
+  - Lançamento com status `PENDENTE` força `payment_date = null`.
+- [x] Validação matemática determinística de saldos (RN02, RN03 e RN04):
+  - Saldo Inicial (RN04) atua como valor base.
+  - Saldo Atual (RN02): Saldo Inicial + Receitas Pagas (`payment_date <= CURRENT_DATE`) - Despesas Pagas (`payment_date <= CURRENT_DATE`). Transações pagas com data futura não afetam o Saldo Atual.
+  - Saldo Previsto (RN03): Saldo Atual + Receitas Pendentes do Mês - Despesas Pendentes do Mês.
+- [x] Validação de destaque de contas atrasadas (RN06):
+  - Lançamentos pendentes com `due_date < CURRENT_DATE` marcados com `is_overdue = true` no painel de alertas do Dashboard.
+- [x] Validação de duplicação em rascunho de memória:
+  - `GET /api/transactions/:id/duplicate-draft` preserva a descrição original, categoria, forma de pagamento e valor, define status `PENDENTE` e `payment_date = null`, sem persistir nenhum registro prévio no banco.
+- [x] Validação de exportação CSV em memória (RN09):
+  - Retorno via stream em memória em conformidade com RFC 4180, cabeçalhos `Content-Type: text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="extrato_YYYY_MM.csv"`, BOM UTF-8 e separador de colunas `;`.
+- [x] Validação do worker Cron e idempotência (RN07):
+  - Acionamento seguro da rota interna de cron via cabeçalho `Authorization: Bearer <CRON_SECRET>` com comparação timing-safe.
+  - Idempotência validada: disparos repetidos na mesma data são interceptados e retornam `status: "skipped"` com `reason: "already_executed"`.
+- [x] Validação defensiva de entrada e limites de infraestrutura:
+  - Parâmetros de rota com UUID malformado rejeitados defensivamente com status `400 Bad Request` pelo middleware `validateUuidParam`.
+  - Body payload superior a 100kb rejeitado com status `413 Payload Too Large`.
+- [x] Validação de exclusão em cascata (RN10) e auditoria:
+  - `DELETE /api/users/me` remove o usuário da tabela `users` e expurga em cascata todas as transações, categorias personalizadas e tokens de redefinição.
+  - Auditoria confirmada na tabela `security_logs` com evento `ACCOUNT_DELETED`.
+- [x] Validação e higienização do arquivo de log `backend/logs/error.log`:
+  - Confirmação de que nenhuma senha em texto claro ou token bruto é exposto nos arquivos de log.
+- [x] Suíte de testes completa automatizada executada via `npm test` englobando fases 4, 5, 6, 7 e 8 com **100% de sucesso**.
+- [x] Build de produção do frontend (`npm run build`) validado com **100% de sucesso**.
+
 ---
 
 ## 3. Pendências Registradas
 
 ### Pendências Funcionais:
-1. **Fase 8 (Testes Integrados, Validação & Hardening Final):** Testes ponta a ponta cobrindo simultaneamente todas as 10 regras de negócio (RN01 a RN10), auditoria de segurança, logs de erro e validação de go-live.
+* **Nenhuma.** Todas as funcionalidades de negócio e testes das 8 fases do projeto estão 100% implementadas e validadas.
 
-### Pendência de Segurança:
-* A **Revisão de Segurança Global Definitiva** deverá ser executada na Fase 8.
+### Pendência de Operação em Produção:
+* **Validação de envio real de e-mails com provedor SMTP de produção:** em ambiente de desenvolvimento local, o sistema opera em modo mock seguro com integridade comprovada. O usuário deverá configurar as credenciais reais de SMTP (ex.: SendGrid, Amazon SES, Mailtrap Live) no arquivo `.env` de produção durante o go-live.
 
 ---
 
 ## 4. Próximo Passo Recomendado
 
-* **Continuidade do Desenvolvimento:** Iniciar a **Fase 8: Testes Integrados, Validação de Regras e Hardening** (execução de suíte de testes finais, validação de auditoria em `security_logs` e checklist de go-live).
+* **Todas as fases de codificação do projeto foram concluídas.**
+* **Recomendação:** Orientar o usuário a abrir um novo chat e executar o prompt de validação final de segurança e go-live (Passo 5).
