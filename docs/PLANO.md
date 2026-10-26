@@ -210,15 +210,15 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `frontend/src/components/common/Badge.jsx`
   * `frontend/src/components/common/Button.jsx`
 * **Checklist:**
-  - [ ] Implementar seletor de mês/ano no Dashboard e Extrato.
-  - [ ] Implementar Cards de KPI com numerais tabulares (`tabular-nums`) e badges de variação.
-  - [ ] Implementar gráfico de rosca de despesas por categoria usando `Recharts`.
-  - [ ] Implementar painel de alertas no Dashboard com listagem de contas vencidas e a vencer.
-  - [ ] Implementar tabela densa de transações com badges de status, formatação de moeda e destaque vermelho em contas atrasadas (RN06).
-  - [ ] Implementar filtros de busca por descrição e categoria no Extrato.
-  - [ ] Implementar modal de criação, edição e duplicação de lançamentos com sincronização dinâmica de categorias por tipo.
-  - [ ] Implementar modal de gerenciamento de categorias personalizadas (criação, edição e exclusão).
-  - [ ] Implementar gatilho de exportação CSV no frontend recebendo o arquivo via stream.
+  - [x] Implementar seletor de mês/ano no Dashboard e Extrato.
+  - [x] Implementar Cards de KPI com numerais tabulares (`tabular-nums`) e badges de variação.
+  - [x] Implementar gráfico de rosca de despesas por categoria usando `Recharts`.
+  - [x] Implementar painel de alertas no Dashboard com listagem de contas vencidas e a vencer.
+  - [x] Implementar tabela densa de transações com badges de status, formatação de moeda e destaque vermelho em contas atrasadas (RN06).
+  - [x] Implementar filtros de busca por descrição e categoria no Extrato.
+  - [x] Implementar modal de criação, edição e duplicação de lançamentos com sincronização dinâmica de categorias por tipo.
+  - [x] Implementar modal de gerenciamento de categorias personalizadas (criação, edição e exclusão).
+  - [x] Implementar gatilho de exportação CSV no frontend recebendo o arquivo via stream.
 * **Critério de conclusão:** Interface 100% funcional integrada à API REST, permitindo ciclo completo de gestão financeira com excelente usabilidade.
 
 ---

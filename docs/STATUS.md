@@ -1,10 +1,10 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Fase 6 (Frontend — Design System, Autenticação e Layout Base)** — **CONCLUÍDA EM 26/10/2026**
-* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas) e Fase 6 (Frontend — Design System, Auth & Layout Base).
-* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
-* **Revisão de Segurança:** Realizada para Fases 1 a 5 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente das Fases 6 a 8.
+* **Fase 7 (Frontend: Dashboard, Extrato, Modais e Exportação CSV)** — **CONCLUÍDA EM 26/10/2026**
+* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas), Fase 6 (Frontend — Design System, Auth & Layout Base) e Fase 7 (Frontend: Dashboard, Extrato, Modais e CSV).
+* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 8 (Testes Integrados, Validação & Hardening Final).
+* **Revisão de Segurança:** Realizada para Fases 1 a 6 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente da Fase 8.
 
 ---
 
@@ -113,19 +113,32 @@
 - [x] Criação da suíte de testes de integração da Fase 6 (`backend/test-phase6.js`) cobrindo 100% dos fluxos de cadastro, login, perfil, forgot-password e exclusão em cascata, integrada ao comando `npm test`.
 - [x] Compilação do frontend validada via `npm run build` com 100% de sucesso sem warnings ou erros.
 
+### Fase 7: Frontend — Dashboard, Extrato, Modais e Exportação CSV (26/10/2026)
+- [x] Criação do componente `MonthYearSelector.jsx` permitindo navegação entre meses/anos com botões anterior/próximo e atalho para o mês atual.
+- [x] Criação de `KpiCards.jsx` renderizando os 4 indicadores financeiros obrigatórios (Saldo Atual com RN02, Saldo Previsto com RN03, Entradas do Mês e Saídas do Mês) com tipografia tabular (`tabular-nums`), ícones e badges contextuais.
+- [x] Criação de `ExpensesChart.jsx` com gráfico rosca interativo via `recharts` (`PieChart`, `Tooltip`), paleta executiva e legenda detalhando valores e participações percentuais.
+- [x] Criação de `AlertsPanel.jsx` exibindo lista de obrigações pendentes com destaque imediato para vencidas (`is_overdue`) e a vencer no dia.
+- [x] Criação de `TransactionTable.jsx` com layout denso, ordenação, badges de status, formatação monetária em BRL e destaque visual em vermelho para contas atrasadas (RN06).
+- [x] Criação de `TransactionModal.jsx` atendendo à criação, edição e duplicação com sincronização dinâmica de categorias por tipo (RN08) e travas de datas/status (RN05).
+- [x] Criação de `CategoryManagerModal.jsx` para gerenciamento completo de categorias personalizadas (criação, edição e exclusão) com travas de integridade para categorias padrão e bloqueio de exclusão/alteração de tipo (RN08).
+- [x] Implementação de gatilho de exportação CSV em memória via stream (`handleExportCsv`) com download imediato do arquivo filtrado no navegador (RN09).
+- [x] Integração completa da tela `Dashboard.jsx` consumindo `GET /api/dashboard`.
+- [x] Integração completa da tela `Transactions.jsx` com filtros de texto, dropdown de categorias e paginação/recarregamento.
+- [x] Criação da suíte automatizada `backend/test-phase7.js` validando todos os fluxos de ponta a ponta integrada ao `npm test`.
+- [x] Validação do build de produção via `npm run build` no frontend com 100% de sucesso.
+
 ---
 
 ## 3. Pendências Registradas
 
 ### Pendências Funcionais:
-1. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
-2. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
+1. **Fase 8 (Testes Integrados, Validação & Hardening Final):** Testes ponta a ponta cobrindo simultaneamente todas as 10 regras de negócio (RN01 a RN10), auditoria de segurança, logs de erro e validação de go-live.
 
 ### Pendência de Segurança:
-* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 7 e 8, cobrindo o frontend completo, tokens em `localStorage` e fluxos de telas.
+* A **Revisão de Segurança Global Definitiva** deverá ser executada na Fase 8.
 
 ---
 
 ## 4. Próximo Passo Recomendado
 
-* **Continuidade do Desenvolvimento:** Iniciar a **Fase 7: Frontend — Dashboard, Extrato, Modais e Exportação CSV** (`frontend/src/pages/Dashboard.jsx`, `frontend/src/pages/Transactions.jsx`, `frontend/src/components/dashboard/*`, `frontend/src/components/transactions/*`).
+* **Continuidade do Desenvolvimento:** Iniciar a **Fase 8: Testes Integrados, Validação de Regras e Hardening** (execução de suíte de testes finais, validação de auditoria em `security_logs` e checklist de go-live).
