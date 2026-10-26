@@ -184,12 +184,12 @@ Este documento define as fases sequenciais e incrementais para a construção do
   * `frontend/src/pages/ResetPassword.jsx`
   * `frontend/src/pages/Profile.jsx`
 * **Checklist:**
-  - [ ] Configurar tipografia (Plus Jakarta Sans e Inter) e variáveis de tema no CSS.
-  - [ ] Configurar cliente HTTP (Axios ou Fetch) com interceptor para Bearer Token e redirecionamento automático em caso de 401.
-  - [ ] Implementar `AuthContext` com login, registro, logout e persistência de token no LocalStorage.
-  - [ ] Implementar telas de autenticação (`/login`, `/register`, `/forgot-password`, `/reset-password`).
-  - [ ] Implementar layout base da aplicação com Sidebar e Header contendo os logos oficiais (`assets/logo.png` e `assets/logo_branca.png`).
-  - [ ] Implementar tela de Perfil (`/profile`) com edição de nome/saldo inicial e modal de exclusão definitiva de conta.
+  - [x] Configurar tipografia (Plus Jakarta Sans e Inter) e variáveis de tema no CSS.
+  - [x] Configurar cliente HTTP (Axios ou Fetch) com interceptor para Bearer Token e redirecionamento automático em caso de 401.
+  - [x] Implementar `AuthContext` com login, registro, logout e persistência de token no LocalStorage.
+  - [x] Implementar telas de autenticação (`/login`, `/register`, `/forgot-password`, `/reset-password`).
+  - [x] Implementar layout base da aplicação com Sidebar e Header contendo os logos oficiais (`assets/logo.png` e `assets/logo_branca.png`).
+  - [x] Implementar tela de Perfil (`/profile`) com edição de nome/saldo inicial e modal de exclusão definitiva de conta.
 * **Critério de conclusão:** Fluxo completo de autenticação e perfil funcionando no frontend com feedback visual responsivo e design fiel ao `DESIGN.md`.
 
 ---

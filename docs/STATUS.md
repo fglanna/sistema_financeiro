@@ -1,9 +1,9 @@
 # Status do Projeto — Sistema de Controle Financeiro Pessoal
 
 ## 1. Fase Atual
-* **Fase 5 (Backend Avançado: Dashboard, Exportação CSV e Worker Cron)** — **CONCLUÍDA EM 17/10/2026**
-* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos) e Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas).
-* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 6 (Frontend — Design System, Auth & Layout), Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
+* **Fase 6 (Frontend — Design System, Autenticação e Layout Base)** — **CONCLUÍDA EM 26/10/2026**
+* **Fases Funcionais Concluídas:** Fase 1 (Infraestrutura), Fase 2 (Banco de Dados, Migrations & Seeds), Fase 3 (Backend Core — Auth, Usuários e Segurança), Fase 4 (Backend Domínio — Categorias & Lançamentos), Fase 5 (Backend Avançado — Dashboard, CSV & Cron Alertas) e Fase 6 (Frontend — Design System, Auth & Layout Base).
+* **Fases Funcionais Pendentes (Obrigatórias antes do Go-Live):** Fase 7 (Frontend — Dashboard, Extrato, Modais & CSV) e Fase 8 (Testes Integrados, Validação & Hardening Final).
 * **Revisão de Segurança:** Realizada para Fases 1 a 5 e infraestrutura de deploy (suporte a DATABASE_URL, SSL com verificação de certificado, CRON_SECRET timing-safe e idempotência de disparos). Revisão final pendente das Fases 6 a 8.
 
 ---
@@ -98,20 +98,34 @@
 - [x] `npm test` executado com **100% de sucesso** e **zero erros SMTP** no output (modo mock ativo).
 - [ ] **Pendência:** Validação de envio real de e-mails com SMTP configurado (credenciais reais no `.env`) será feita manualmente pelo usuário em ambiente de produção.
 
+### Fase 6: Frontend — Design System, Autenticação e Layout Base (26/10/2026)
+- [x] Configuração centralizada do cliente HTTP (`frontend/src/services/api.js`) com Axios, interceptor de injeção automática de `Authorization: Bearer <token>` e interceptor de redirecionamento automático para `/login` ao capturar status HTTP `401 Unauthorized`.
+- [x] Criação do contexto de autenticação (`frontend/src/contexts/AuthContext.jsx`) gerenciando estado de `user`, `token`, `loading`, `error`, ciclo de persistência no `localStorage`, validação na montagem via `GET /api/users/me`, e métodos `login`, `register`, `logout`, `updateProfile` e `deleteAccount`.
+- [x] Criação de componentes base de UI em conformidade com o tema *Executive Precision* (`DESIGN.md`): `Button.jsx` (variantes primary, secondary, destructive e ghost com loading spinner), `Input.jsx` (altura 40px, estados de foco, helper text e suporte a numerais tabulares) e `Modal.jsx` (elevação Level 4 com backdrop blur e tecla ESC).
+- [x] Implementação da casca de layout responsiva: `AppLayout.jsx` com proteção de rota (`PrivateRoute`), `Sidebar.jsx` (navegação com links ativos e logotipo oficial) e `Header.jsx` (contexto da tela, perfil resumido e logout).
+- [x] Implementação de telas públicas de autenticação com validações de entrada e alertas de erro:
+  - `Login.jsx` (`/login`): formulário centralizado, validação de e-mail/senha e redirecionamento pós-login.
+  - `Register.jsx` (`/register`): campos completos, saldo inicial opcional (default R$ 0,00), confirmação de senha e login imediato.
+  - `ForgotPassword.jsx` (`/forgot-password`): solicitação de redefinição com feedback genérico por segurança e proteção a rate limiting.
+  - `ResetPassword.jsx` (`/reset-password?token=...`): captura do token da URL, formulário de nova senha e confirmação com mensagem de sucesso.
+- [x] Implementação da tela de Perfil (`Profile.jsx` em `/profile`): formulário de edição de nome e saldo inicial (`PUT /api/users/me`) e Seção Destrutiva com modal de confirmação e exclusão definitiva de conta (`DELETE /api/users/me` — RN10).
+- [x] Telas de transição para `/dashboard` e `/transactions` com placeholders informativos preparados para recepção dos componentes analíticos da Fase 7.
+- [x] Criação da suíte de testes de integração da Fase 6 (`backend/test-phase6.js`) cobrindo 100% dos fluxos de cadastro, login, perfil, forgot-password e exclusão em cascata, integrada ao comando `npm test`.
+- [x] Compilação do frontend validada via `npm run build` com 100% de sucesso sem warnings ou erros.
+
 ---
 
 ## 3. Pendências Registradas
 
 ### Pendências Funcionais:
-1. **Fase 6 (Frontend Base):** Roteamento React, `AuthContext`, telas de autenticação e casca de navegação (*AppLayout*).
-2. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
-3. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
+1. **Fase 7 (Frontend Funcional):** Telas de Dashboard com Recharts, Extrato com filtros, modais de lançamentos e integração CSV.
+2. **Fase 8 (Testes Integrados & Validação Final):** Testes ponta a ponta de todas as 10 regras de negócio e validação geral.
 
 ### Pendência de Segurança:
-* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 6 a 8, cobrindo o frontend completo, tokens em `localStorage` e fluxos de telas.
+* A **Revisão de Segurança Global Definitiva** deverá ser reexecutada após a implementação das Fases 7 e 8, cobrindo o frontend completo, tokens em `localStorage` e fluxos de telas.
 
 ---
 
 ## 4. Próximo Passo Recomendado
 
-* **Continuidade do Desenvolvimento:** Iniciar a **Fase 6: Frontend — Design System, Autenticação e Layout Base** (`frontend/src/contexts/AuthContext.jsx`, `frontend/src/services/api.js`, `frontend/src/components/layout/AppLayout.jsx`, telas de autenticação `/login`, `/register`, `/forgot-password`, `/reset-password` e tela de perfil `/profile`).
+* **Continuidade do Desenvolvimento:** Iniciar a **Fase 7: Frontend — Dashboard, Extrato, Modais e Exportação CSV** (`frontend/src/pages/Dashboard.jsx`, `frontend/src/pages/Transactions.jsx`, `frontend/src/components/dashboard/*`, `frontend/src/components/transactions/*`).

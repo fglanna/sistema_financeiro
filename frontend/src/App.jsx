@@ -1,19 +1,44 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+
+// Layout
+import AppLayout from './components/layout/AppLayout';
+
+// Páginas de Autenticação
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+// Páginas Internas
+import Dashboard from './pages/Dashboard';
+import Transactions from './pages/Transactions';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      <div className="bg-brand-card p-8 rounded-lg shadow-card border border-brand-border max-w-md w-full">
-        <h1 className="text-2xl font-bold font-display text-brand-text mb-2">
-          Sistema de Controle Financeiro
-        </h1>
-        <p className="text-brand-muted text-sm mb-4">
-          Ambiente e infraestrutura inicial preparados com sucesso.
-        </p>
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-tertiary-light text-brand-tertiary-dark border border-emerald-200">
-          Fase 1 Concluída
-        </span>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Rotas Públicas de Autenticação */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Rotas Protegidas no Layout Principal */}
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Redirecionamentos padrão */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
