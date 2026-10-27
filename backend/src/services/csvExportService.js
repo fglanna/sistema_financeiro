@@ -2,14 +2,33 @@ const transactionRepository = require('../repositories/transactionRepository');
 
 class CsvExportService {
   /**
-   * Escapa campos no formato CSV RFC 4180
+   * Neutraliza caracteres perigosos no início de campos textuais
+   * para prevenir CSV Formula Injection no Excel e LibreOffice.
+   * Caracteres tratados: '=', '+', '-', '@', '\t', '\r'
+   * @param {string|number|null} value
+   */
+  sanitizeFormulaInjection(value) {
+    if (value === null || value === undefined) {
+      return value;
+    }
+    const str = String(value);
+    // Se iniciar com '=', '+', '-', '@', tabulação ou retorno de carro (inclusive se precedido de espaços/tabs):
+    if (/^[\s\t\r]*[=+@\-\t\r]/.test(str)) {
+      return `'${str}`;
+    }
+    return str;
+  }
+
+  /**
+   * Escapa campos no formato CSV RFC 4180 e neutraliza CSV Injection
    * @param {string|number|null} value
    */
   escapeCsvField(value) {
     if (value === null || value === undefined) {
       return '""';
     }
-    const stringValue = String(value);
+    const sanitized = this.sanitizeFormulaInjection(value);
+    const stringValue = String(sanitized);
     // Se contiver vírgula, ponto e vírgula, aspas ou quebras de linha, envolve em aspas e duplica aspas internas
     if (stringValue.includes('"') || stringValue.includes(';') || stringValue.includes('\n') || stringValue.includes('\r')) {
       return `"${stringValue.replace(/"/g, '""')}"`;

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const config = require('./config/config');
 const { errorHandler } = require('./middlewares/errorHandler');
 
@@ -13,6 +14,29 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const cronRoutes = require('./routes/cronRoutes');
 
 const app = express();
+
+// Segurança HTTP – middleware Helmet
+// Configurações padrão são suficientes para maioria dos cabeçalhos.
+// Ajustes finos são aplicados apenas em produção para não interferir no
+// desenvolvimento ou no consumo da API pelo frontend.
+if (process.env.NODE_ENV === 'production') {
+  app.use(
+    require('helmet')({
+      // Exemplo: política de segurança de conteúdo desabilitada para permitir
+      // carregamento de assets externos que podem ser necessários.
+      contentSecurityPolicy: false,
+      // HSTS (Strict-Transport-Security) – apenas em produção.
+      strictTransportSecurity: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      // Referrer‑Policy para reduzir vazamento de URLs.
+      referrerPolicy: { policy: 'no-referrer' },
+    })
+  );
+}
+
 
 // Hardening de Segurança HTTP: remove header que expõe a stack Express
 app.disable('x-powered-by');
