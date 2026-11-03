@@ -10,6 +10,12 @@
 
 ## 2. O que já foi concluído
 
+### Implantação e Nuvem — Provisionamento do PostgreSQL no Neon (03/11/2026)
+- [x] Provisionamento do PostgreSQL 18 gerenciado no Neon (projeto `sistema-financeiro`, branch default `production`, região AWS US East 2).
+- [x] Execução com sucesso das 8 migrações estruturais do banco de dados (`npm run migrate`) via conexão direta.
+- [x] Execução com sucesso dos 2 arquivos de seeds (`01_payment_methods.js` e `02_default_categories.js`), populando formas de pagamento e categorias globais padrão no Neon.
+- [x] Validação das tabelas e integridade relacional no ambiente de produção em nuvem.
+
 ### Preparação de Publicação para Vercel + Render + PostgreSQL Gerenciado (12/10/2026)
 - [x] Criação do guia definitivo de deploy e infraestrutura ([`docs/DEPLOY.md`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/docs/DEPLOY.md)) cobrindo Vercel, Render, PostgreSQL e estratégias seguras de migrations em produção.
 - [x] Suporte híbrido a `DATABASE_URL` e variáveis individuais no [`backend/src/config/config.js`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/backend/src/config/config.js) e [`backend/knexfile.js`](file:///e:/Jornada_IA-VibeCoding/sistema_financeiro/backend/knexfile.js) com validação de certificados SSL mantida como padrão (`rejectUnauthorized: true`).
