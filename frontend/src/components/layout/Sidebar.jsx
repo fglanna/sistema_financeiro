@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Receipt, User, LogOut, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import Logo from '../common/Logo';
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
@@ -44,16 +45,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Logo e Cabeçalho da Barra */}
           <div className="h-16 px-4 flex items-center justify-between border-b border-brand-border">
-            <div className="flex items-center gap-2.5">
-              <img
-                src="/assets/logo.png"
-                alt="FinPulse Logo"
-                className="h-8 w-auto object-contain"
-              />
-              <span className="font-display font-bold text-lg text-brand-text tracking-tight">
-                FinPulse
-              </span>
-            </div>
+            <Logo size="sm" />
             <div className="flex items-center gap-1">
               <span className="px-2 py-0.5 rounded-full bg-brand-primary-light text-brand-primary font-body text-[10px] uppercase font-bold tracking-wider">
                 Exec

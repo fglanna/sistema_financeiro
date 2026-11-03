@@ -4,6 +4,7 @@ import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import Logo from '../components/common/Logo';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -53,15 +54,8 @@ export default function ForgotPassword() {
     <div className="min-h-screen bg-brand-canvas flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
       <div className="max-w-md w-full bg-white rounded-xl border border-brand-border shadow-card p-6 sm:p-8">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center gap-2 mb-3">
-            <img
-              src="/assets/logo.png"
-              alt="FinPulse Logo"
-              className="h-10 w-auto object-contain"
-            />
-            <span className="font-display font-bold text-2xl text-brand-text tracking-tight">
-              FinPulse
-            </span>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
           <h2 className="text-xl font-bold font-display text-brand-text">
             Recuperar Senha

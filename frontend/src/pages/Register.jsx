@@ -4,6 +4,7 @@ import { User, Mail, Lock, DollarSign, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import Logo from '../components/common/Logo';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -99,15 +100,8 @@ export default function Register() {
       <div className="max-w-md w-full bg-white rounded-xl border border-brand-border shadow-card p-6 sm:p-8 my-6">
         {/* Cabeçalho do Card */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center gap-2 mb-3">
-            <img
-              src="/assets/logo.png"
-              alt="FinPulse Logo"
-              className="h-10 w-auto object-contain"
-            />
-            <span className="font-display font-bold text-2xl text-brand-text tracking-tight">
-              FinPulse
-            </span>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
           <h2 className="text-xl font-bold font-display text-brand-text">
             Crie sua conta

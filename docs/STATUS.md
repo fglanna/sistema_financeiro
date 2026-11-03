@@ -10,6 +10,19 @@
 
 ## 2. O que já foi concluído
 
+### Implantação e Nuvem — Frontend na Vercel (03/11/2026)
+- [x] Conexão do repositório GitHub `fglanna/sistema_financeiro` na Vercel com subpasta `frontend` e framework preset Vite.
+- [x] Configuração da variável `VITE_API_BASE_URL=https://sistema-financeiro-fgl.onrender.com/api`.
+- [x] Regras de rewrite SPA configuradas em `vercel.json` prevenindo erro 404 em recarregamento.
+- [x] URL pública em produção: `https://sistema-financeiro-six-rho.vercel.app/`.
+
+### Implantação e Nuvem — Backend no Render (03/11/2026)
+- [x] Criação do Web Service `sistema-financeiro-fgl` no Render apontando para o repositório GitHub e subpasta `backend`.
+- [x] Configuração segura das variáveis de produção (`NODE_ENV=production`, `DATABASE_URL` do Neon, `TRUST_PROXY=true`, SSL e segredos JWT/Cron).
+- [x] Sincronização estrita de CORS com a URL de produção da Vercel (`FRONTEND_URL=https://sistema-financeiro-six-rho.vercel.app`).
+- [x] Inicialização do serviço em produção confirmada com sucesso: porta 10000, NotificationWorker 06:00 AM agendado e MailService em modo seguro.
+- [x] URL pública em produção: `https://sistema-financeiro-fgl.onrender.com`.
+
 ### Implantação e Nuvem — Provisionamento do PostgreSQL no Neon (03/11/2026)
 - [x] Provisionamento do PostgreSQL 18 gerenciado no Neon (projeto `sistema-financeiro`, branch default `production`, região AWS US East 2).
 - [x] Execução com sucesso das 8 migrações estruturais do banco de dados (`npm run migrate`) via conexão direta.
